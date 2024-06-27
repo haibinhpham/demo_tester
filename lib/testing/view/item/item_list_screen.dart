@@ -1,9 +1,11 @@
 import 'package:demo_tester/central_screen.dart';
 import 'package:demo_tester/testing/controller/user_provider.dart';
 import 'package:demo_tester/testing/view/home_screen.dart';
+import 'package:demo_tester/testing/view/item/add_item_screen.dart';
 import 'package:demo_tester/testing/view/item/item_details_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:provider/provider.dart';
 
@@ -116,11 +118,17 @@ class _ItemListScreenState extends State<ItemListScreen> {
                               print('Filter btn pressed');
                             },
                             icon: const Icon(CupertinoIcons.layers_alt)),
-                        IconButton(
-                            onPressed: () {
-                              print('Add btn pressed');
-                            },
-                            icon: const Icon(CupertinoIcons.add)),
+                        GestureDetector(
+                          child: IconButton(
+                              onPressed: () {
+                                print('Add btn pressed');
+                                Navigator.pushReplacement(context,
+                                    MaterialPageRoute(builder: (context) {
+                                  return const AddItemScreen();
+                                }));
+                              },
+                              icon: const Icon(CupertinoIcons.add)),
+                        ),
                       ],
                     ),
                   ),

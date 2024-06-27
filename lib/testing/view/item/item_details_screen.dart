@@ -1,3 +1,4 @@
+import 'package:demo_tester/testing/view/item/item_list_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mysql1/mysql1.dart';
@@ -78,8 +79,21 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     }
   }
 
-  Future<String> updateItemName() async {
-    return 'Hallo';
+  Future<void> updateItemName(String value) async {
+    try {
+      //get provider
+      int? userId = Provider.of<UserProvider>(context, listen: false).userId;
+      //get conn
+      MySqlConnection connection = await Mysql().connection;
+      //update operation
+      await connection.query(
+          'update hallo.item set hallo.item.item_name = ? where hallo.item.id = ? and hallo.item.item_id = ?',
+          [value, userId, widget.item.item_id]);
+      //reload the page
+      fetchItemDetails();
+    } catch (e) {
+      print('Error updating name: $e');
+    }
   }
 
   @override
@@ -89,7 +103,10 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () {
-            Navigator.of(context).pop(); // Navigate back
+            Navigator.of(context)
+                .pushReplacement(MaterialPageRoute(builder: (context) {
+              return const ItemListScreen();
+            })); // Navigate back
           },
         ),
         flexibleSpace: Container(
@@ -150,7 +167,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                   ),
                   const SizedBox(height: 4),
                   const Text(
-                    'A short description of this product blahblahblahablaalasdlfa;jdajsdfja;lf',
+                    'A short description of this product blahblahblahablaalasdlfajdajsdfja',
                     style: TextStyle(fontSize: 16),
                   ),
                   const Spacer(),
@@ -218,6 +235,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                           content: Text('Please enter a valid number')));
                     } else {
                       print('Update $field');
+                      updateItemQuantity(int.parse(_controller.text));
                       //perform update login
                       Navigator.of(context).pop();
                     }
