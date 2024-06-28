@@ -46,13 +46,13 @@ class _ItemListScreenState extends State<ItemListScreen> {
           [userId]);
       print('Query executed, number of results: ${results.length}');
 
-      List<Item> fetchedOrders = [];
+      List<Item> fetchedItems = [];
       for (var row in results) {
-        var order = Item.fromJson(row.fields);
-        fetchedOrders.add(order);
+        var item = Item.fromJson(row.fields);
+        fetchedItems.add(item);
       }
       setState(() {
-        items = fetchedOrders;
+        items = fetchedItems;
         isLoading = false;
       });
     } catch (e) {
@@ -61,6 +61,72 @@ class _ItemListScreenState extends State<ItemListScreen> {
         isLoading = false;
       });
     }
+  }
+
+  Future<String> deleteItem(int itemId) async {
+    try {
+      //get provider
+      int? userId = Provider.of<UserProvider>(context, listen: false).userId;
+      if (userId == null) {
+        return 'User ID is null';
+      }
+      //get connection
+      MySqlConnection connection = await Mysql().connection;
+      //delete operation
+      //todo insert query
+      await connection.query(
+          'delete from hallo.item where hallo.item.id = ? and hallo.item.item_id = ?',
+          [userId, itemId]);
+      //reload after query
+      fetchAllItems();
+      return 'Delete Successful';
+    } catch (e) {
+      print('Error deleteing item: $e');
+      return 'Delete Error';
+    }
+  }
+
+  void _showConfirmationDialog(int itemId) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Confirm Deletion'),
+            content: const Text('Are you sure?'),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Cancel')),
+              TextButton(
+                  onPressed: () async {
+                    Navigator.of(context).pop();
+                    String result = await deleteItem(itemId);
+                    _showResultDialog(result);
+                  },
+                  child: const Text('Confirm')),
+            ],
+          );
+        });
+  }
+
+  void _showResultDialog(String message) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Result'),
+            content: Text(message),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('OK')),
+            ],
+          );
+        });
   }
 
   @override
@@ -176,6 +242,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
                                 color: Colors.grey,
                               ),
                               onTap: () {
+                                _showConfirmationDialog(item.item_id);
                                 print('Delete icon pressed');
                               },
                             ),

@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:demo_tester/testing/view/customer/customer_list_screen.dart';
 import 'package:demo_tester/testing/view/item/item_list_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -118,7 +119,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                     fontSize: 16, fontWeight: FontWeight.bold),
                               ),
                             ),
-                            onPressed: () async {},
+                            onPressed: () async {
+                              Navigator.pushReplacement(context,
+                                  MaterialPageRoute(builder: ((context) {
+                                return const CustomerListScreen();
+                              })));
+                            },
                           ),
                         ),
                         _gap(),
