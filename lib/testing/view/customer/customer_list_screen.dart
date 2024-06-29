@@ -2,6 +2,7 @@ import 'package:demo_tester/central_screen.dart';
 import 'package:demo_tester/testing/controller/user_provider.dart';
 import 'package:demo_tester/testing/model/mysql.dart';
 import 'package:demo_tester/testing/view/customer/add_customer_screen.dart';
+import 'package:demo_tester/testing/view/customer/customer_details_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mysql1/mysql1.dart';
@@ -60,6 +61,71 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
         isLoading = false;
       });
     }
+  }
+
+  Future<String> deleteCustomer(int customerId) async {
+    try {
+      //get provider
+      int? userId = Provider.of<UserProvider>(context, listen: false).userId;
+      if (userId == null) {
+        return 'User id is null';
+      }
+      //get connection
+      MySqlConnection connection = await Mysql().connection;
+      //delete operation
+      await connection.query(
+          'delete from hallo.customer where hallo.customer.id = ? and hallo.customer.cust_id = ?',
+          [userId, customerId]);
+      //reload after query
+      fetchAllCustomers();
+      return 'Delete Successful';
+    } catch (e) {
+      print('Error deleting item: $e');
+      return 'Delete Error';
+    }
+  }
+
+  void _showResultDialog(String message) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Result'),
+            content: Text(message),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('OK'))
+            ],
+          );
+        });
+  }
+
+  void _showConfirmationDialog(int customerId) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Confirm Deletion'),
+            content: const Text('Are you sure'),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Cancel')),
+              TextButton(
+                  onPressed: () async {
+                    Navigator.of(context).pop();
+                    String result = await deleteCustomer(customerId);
+                    _showResultDialog(result);
+                  },
+                  child: const Text('Confirm'))
+            ],
+          );
+        });
   }
 
   @override
@@ -200,11 +266,17 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                                   color: Colors.grey,
                                 ),
                                 onTap: () {
+                                  _showConfirmationDialog(customer.cust_id);
                                   print('Delete icon pressed');
                                 },
                               ),
                               onTap: () {
                                 print('List Tile pressed');
+                                Navigator.push(context,
+                                    MaterialPageRoute(builder: (context) {
+                                  return CustomerDetailScreen(
+                                      customer: customer);
+                                }));
                               },
                             ),
                           ),
