@@ -1,3 +1,4 @@
+import 'package:demo_tester/testing/controller/customer_provider.dart';
 import 'package:demo_tester/testing/controller/order_provider.dart';
 import 'package:demo_tester/testing/controller/user_provider.dart';
 import 'package:demo_tester/testing/view/auth/registration_screen.dart';
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (context) => UserProvider()),
         ChangeNotifierProvider(create: (context) => OrderProvider()),
+        ChangeNotifierProvider(create: (context) => CustomerProvider()),
       ],
       child: const MaterialApp(
         title: 'Retrieve Stuff',

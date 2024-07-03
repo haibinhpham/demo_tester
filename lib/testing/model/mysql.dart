@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:mysql1/mysql1.dart';
 
 class Mysql {
@@ -9,6 +10,7 @@ class Mysql {
 
   static final Mysql _instance = Mysql._internal();
   MySqlConnection? _connection;
+  Timer? _keepAliveTimer;
 
   factory Mysql() {
     return _instance;
@@ -36,7 +38,13 @@ class Mysql {
   // }
 
   Future<MySqlConnection> get connection async {
-    _connection ??= await _initializeConnection();
+    if (_connection == null) {
+      _connection ??= await _initializeConnection();
+      _startKeepAlive();
+    } else if (!await _isConnected()) {
+      _connection = await _initializeConnection();
+      _startKeepAlive();
+    }
     return _connection!;
   }
 
@@ -48,13 +56,41 @@ class Mysql {
       password: password,
       db: db,
     );
+    print('Connecting...');
+    MySqlConnection connection = await MySqlConnection.connect(settings);
     print('Connected to MySQl');
-    return await MySqlConnection.connect(settings);
+    return connection;
+  }
+
+  Future<bool> _isConnected() async {
+    try {
+      await _connection!.query('select 1');
+      return true;
+    } catch (e) {
+      print('Mysql connection lost: $e');
+      return false;
+    }
+  }
+
+  void _startKeepAlive() {
+    //cancel existing timer
+    _keepAliveTimer?.cancel();
+    _keepAliveTimer = Timer.periodic(Duration(minutes: 1), (timer) async {
+      try {
+        await _connection!.query('select 1');
+        print('Keep-alive query executed successfully');
+      } catch (e) {
+        print('Keep-alive query failed: $e');
+        _connection = await _initializeConnection();
+      }
+    });
   }
 
   void closeConnection() async {
     await _connection?.close();
     _connection = null;
+    _keepAliveTimer?.cancel();
+    _keepAliveTimer = null;
     print('MySQL connection closed');
   }
 }

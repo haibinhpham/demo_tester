@@ -1,4 +1,5 @@
 import 'package:demo_tester/central_screen.dart';
+import 'package:demo_tester/testing/controller/customer_provider.dart';
 import 'package:demo_tester/testing/controller/user_provider.dart';
 import 'package:demo_tester/testing/model/mysql.dart';
 import 'package:demo_tester/testing/view/customer/add_customer_screen.dart';
@@ -272,10 +273,13 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                               ),
                               onTap: () {
                                 print('List Tile pressed');
+                                //save to provider
+                                Provider.of<CustomerProvider>(context,
+                                        listen: false)
+                                    .setCustomerId(customer.cust_id);
                                 Navigator.push(context,
                                     MaterialPageRoute(builder: (context) {
-                                  return CustomerDetailScreen(
-                                      customer: customer);
+                                  return const CustomerDetailScreen();
                                 }));
                               },
                             ),
