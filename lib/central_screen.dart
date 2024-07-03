@@ -4,7 +4,7 @@ import 'package:demo_tester/testing/view/order/add_order_screen.dart';
 import 'package:demo_tester/testing/view/customer/customer_list_screen.dart';
 import 'package:demo_tester/testing/view/display_screen.dart';
 import 'package:demo_tester/testing/view/home_screen.dart';
-import 'package:demo_tester/testing/view/order/order_screen.dart';
+import 'package:demo_tester/testing/view/order/order_list_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -20,7 +20,7 @@ class _CentralScreenState extends State<CentralScreen> {
 
   List<Widget> _pages = [
     HomeScreen(),
-    OrderScreen(),
+    OrderListScreen(),
     ItemListScreen(),
     CustomerListScreen(),
     AddOrderScreen(),

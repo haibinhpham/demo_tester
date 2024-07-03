@@ -1,18 +1,21 @@
+import 'package:demo_tester/central_screen.dart';
+import 'package:demo_tester/testing/view/order/order_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:provider/provider.dart';
+import '../../controller/order_provider.dart';
 import '../../controller/user_provider.dart';
 import '../../model/mysql.dart';
 import '../../model/order.dart';
 
-class OrderScreen extends StatefulWidget {
-  const OrderScreen({super.key});
+class OrderListScreen extends StatefulWidget {
+  const OrderListScreen({super.key});
 
   @override
-  State<OrderScreen> createState() => _OrderScreenState();
+  State<OrderListScreen> createState() => _OrderListScreenState();
 }
 
-class _OrderScreenState extends State<OrderScreen> {
+class _OrderListScreenState extends State<OrderListScreen> {
   Order? order;
   List<Order> orders = [];
   bool isLoading = true;
@@ -60,8 +63,35 @@ class _OrderScreenState extends State<OrderScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Orders'),
-        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          onPressed: () {
+            Navigator.of(context)
+                .pushReplacement(MaterialPageRoute(builder: (context) {
+              return const CentralScreen();
+            })); // Navigate back
+          },
+        ),
+        title: const Text(
+          'Your Orders',
+          style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              letterSpacing: 2),
+        ),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.deepPurple,
+                Colors.blue,
+              ],
+            ),
+          ),
+        ),
+        elevation: 0, // Removes the shadow under the AppBar
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -80,8 +110,27 @@ class _OrderScreenState extends State<OrderScreen> {
                         Text('Customer id: ${order.cust_id}'),
                         Text('Order no: ${order.order_number}'),
                         Text('Customer name: ${order.cust_name}'),
+                        Text('Order status: ${order.status}'),
                       ],
                     ),
+                    trailing: GestureDetector(
+                      child: IconButton(
+                        onPressed: () {
+                          print('Delete btn presssed');
+                        },
+                        icon: const Icon(Icons.delete),
+                      ),
+                    ),
+                    onTap: () {
+                      print('List tile pressed');
+                      //save to provider
+                      Provider.of<OrderProvider>(context, listen: false)
+                          .setOrderId(order.lmao_id);
+                      Navigator.pushReplacement(context,
+                          MaterialPageRoute(builder: (context) {
+                        return const OrderDetailScreen();
+                      }));
+                    },
                   ),
                 );
               }),

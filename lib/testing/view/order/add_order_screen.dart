@@ -184,7 +184,7 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
     }
   }
 
-  Future<void> performAddItem() async {
+  Future<void> performAddOrder() async {
     try {
       //get provider
       int? userId = Provider.of<UserProvider>(context, listen: false).userId;
@@ -203,8 +203,8 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
         int customerId = selectedCustomerData['cust_id'];
         //add entry into lmao table
         var lmaoResult = await txn.query(
-            'insert into hallo.lmao(id,order_number,cust_id) values (?,?,?)',
-            [userId, _orderNumberController.text, customerId]);
+            'insert into hallo.lmao(id,order_number,cust_id,status) values (?,?,?,?)',
+            [userId, _orderNumberController.text, customerId, 'created']);
 
         //get the new lmao_id
         int lmaoId = lmaoResult.insertId!;
@@ -368,7 +368,7 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
                               ),
                             ),
                             onPressed: () async {
-                              await performAddItem();
+                              await performAddOrder();
                             },
                             child: const Padding(
                               padding: EdgeInsets.all(10.0),
