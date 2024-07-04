@@ -3,8 +3,8 @@ import 'package:demo_tester/testing/view/order/order_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:provider/provider.dart';
-import '../../controller/order_provider.dart';
-import '../../controller/user_provider.dart';
+import '../../controller/provider/order_provider.dart';
+import '../../controller/provider/user_provider.dart';
 import '../../model/mysql.dart';
 import '../../model/order.dart';
 

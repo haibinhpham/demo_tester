@@ -1,4 +1,4 @@
-import 'package:demo_tester/testing/controller/customer_provider.dart';
+import 'package:demo_tester/testing/controller/provider/customer_provider.dart';
 import 'package:demo_tester/testing/model/mysql.dart';
 import 'package:demo_tester/testing/view/customer/customer_list_screen.dart';
 import 'package:flutter/material.dart';

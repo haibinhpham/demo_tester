@@ -1,6 +1,6 @@
-import 'package:demo_tester/testing/controller/customer_provider.dart';
-import 'package:demo_tester/testing/controller/order_provider.dart';
-import 'package:demo_tester/testing/controller/user_provider.dart';
+import 'package:demo_tester/testing/controller/provider/customer_provider.dart';
+import 'package:demo_tester/testing/controller/provider/order_provider.dart';
+import 'package:demo_tester/testing/controller/provider/user_provider.dart';
 import 'package:demo_tester/testing/view/auth/registration_screen.dart';
 import 'package:demo_tester/testing/view/display_screen.dart';
 import 'package:demo_tester/testing/view/auth/signin_screen.dart';

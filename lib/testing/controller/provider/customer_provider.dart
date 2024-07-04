@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../model/customer.dart';
+import '../../model/customer.dart';
 
 class CustomerProvider extends ChangeNotifier {
   int? custId;

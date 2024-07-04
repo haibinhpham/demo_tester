@@ -1,6 +1,6 @@
 import 'package:demo_tester/central_screen.dart';
-import 'package:demo_tester/testing/controller/customer_provider.dart';
-import 'package:demo_tester/testing/controller/user_provider.dart';
+import 'package:demo_tester/testing/controller/provider/customer_provider.dart';
+import 'package:demo_tester/testing/controller/provider/user_provider.dart';
 import 'package:demo_tester/testing/model/mysql.dart';
 import 'package:demo_tester/testing/view/customer/add_customer_screen.dart';
 import 'package:demo_tester/testing/view/customer/customer_details_screen.dart';
