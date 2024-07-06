@@ -25,7 +25,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
       //get provider
       int? userId = Provider.of<UserProvider>(context, listen: false).userId;
       if (userId == null) {
-        print('user id null');
+        debugPrint('user id null');
       }
       //get conn
       MySqlConnection connection = await Mysql().connection;
@@ -35,7 +35,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
           [itemName]);
       int count = results.first['count'];
       if (count > 0) {
-        print('Order already exists');
+        debugPrint('Order already exists');
         return 'Order already exists';
       }
 
@@ -45,7 +45,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
           [userId, itemName, quantity]);
       return 'Item added!';
     } catch (e) {
-      print('Error adding item: $e');
+      debugPrint('Error adding item: $e');
       return 'Error adding item';
     }
   }
@@ -62,10 +62,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
                   onPressed: () {
                     Navigator.of(context).pop();
                     if (message == 'Item added!') {
-                      Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (context) {
-                        return const ItemListScreen();
-                      }));
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pop();
                     }
                   },
                   child: const Text('OK'))
@@ -107,15 +105,6 @@ class _AddItemScreenState extends State<AddItemScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
-          onPressed: () {
-            Navigator.of(context)
-                .pushReplacement(MaterialPageRoute(builder: (context) {
-              return const ItemListScreen();
-            }));
-          },
-        ),
         title: const Text(
           'Add Item',
           style: TextStyle(

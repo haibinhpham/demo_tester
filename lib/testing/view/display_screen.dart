@@ -1,18 +1,17 @@
-import 'package:demo_tester/testing/controller/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:mysql1/mysql1.dart';
-import 'package:provider/provider.dart';
 import '../model/mysql.dart';
 import '../model/user.dart';
 
 class UserListScreen extends StatefulWidget {
+  const UserListScreen({super.key});
+
   @override
-  _UserListScreenState createState() => _UserListScreenState();
+  State<UserListScreen> createState() => _UserListScreenState();
 }
 
 class _UserListScreenState extends State<UserListScreen> {
   List<User> users = [];
-  late MySqlConnection _connection;
 
   @override
   void initState() {
@@ -43,7 +42,7 @@ class _UserListScreenState extends State<UserListScreen> {
         users = fetchedUsers;
       });
     } catch (e) {
-      print('Error fetching data: $e');
+      debugPrint('Error fetching data: $e');
     }
     // Do not close connection here to keep it open for possible future operations
   }

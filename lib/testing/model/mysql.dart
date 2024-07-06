@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:mysql1/mysql1.dart';
 
 class Mysql {
@@ -56,9 +57,9 @@ class Mysql {
       password: password,
       db: db,
     );
-    print('Connecting...');
+    debugPrint('Connecting...');
     MySqlConnection connection = await MySqlConnection.connect(settings);
-    print('Connected to MySQl');
+    debugPrint('Connected to MySQl');
     return connection;
   }
 
@@ -67,7 +68,7 @@ class Mysql {
       await _connection!.query('select 1');
       return true;
     } catch (e) {
-      print('Mysql connection lost: $e');
+      debugPrint('Mysql connection lost: $e');
       return false;
     }
   }
@@ -75,12 +76,12 @@ class Mysql {
   void _startKeepAlive() {
     //cancel existing timer
     _keepAliveTimer?.cancel();
-    _keepAliveTimer = Timer.periodic(Duration(minutes: 1), (timer) async {
+    _keepAliveTimer = Timer.periodic(const Duration(minutes: 1), (timer) async {
       try {
         await _connection!.query('select 1');
-        print('Keep-alive query executed successfully');
+        debugPrint('Keep-alive query executed successfully');
       } catch (e) {
-        print('Keep-alive query failed: $e');
+        debugPrint('Keep-alive query failed: $e');
         _connection = await _initializeConnection();
       }
     });
@@ -91,6 +92,6 @@ class Mysql {
     _connection = null;
     _keepAliveTimer?.cancel();
     _keepAliveTimer = null;
-    print('MySQL connection closed');
+    debugPrint('MySQL connection closed');
   }
 }

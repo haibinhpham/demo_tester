@@ -29,7 +29,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           [userName, password, address]);
       return 'Registered Sucessfull';
     } catch (e) {
-      print('Error with registration: $e');
+      debugPrint('Error with registration: $e');
       return 'Error registering';
     }
   }
@@ -56,14 +56,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Text(
                         "Welcome to Grupee!",
-                        style: Theme.of(context).textTheme.headline5,
+                        style: Theme.of(context).textTheme.headlineSmall,
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: Text(
                         "Enter your information to continue.",
-                        style: Theme.of(context).textTheme.caption,
+                        style: Theme.of(context).textTheme.bodySmall,
                         textAlign: TextAlign.center,
                       ),
                     ),
