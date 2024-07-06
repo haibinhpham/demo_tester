@@ -2,13 +2,12 @@ import 'package:demo_tester/central_screen.dart';
 import 'package:demo_tester/testing/controller/provider/user_provider.dart';
 import 'package:demo_tester/testing/model/mysql.dart';
 import 'package:demo_tester/testing/view/auth/registration_screen.dart';
-import 'package:demo_tester/testing/view/display_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:provider/provider.dart';
 
 class SigninScreen extends StatefulWidget {
-  const SigninScreen({Key? key}) : super(key: key);
+  const SigninScreen({super.key});
 
   @override
   State<SigninScreen> createState() => _SigninScreenState();
@@ -36,7 +35,7 @@ class _SigninScreenState extends State<SigninScreen> {
         return null;
       }
     } catch (e) {
-      print('Error logging in: $e');
+      debugPrint('Error logging in: $e');
       return null;
     }
   }
@@ -63,14 +62,14 @@ class _SigninScreenState extends State<SigninScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Text(
                         "Welcome to Grupee!",
-                        style: Theme.of(context).textTheme.headline5,
+                        style: Theme.of(context).textTheme.headlineSmall,
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: Text(
                         "Enter your email and password to continue.",
-                        style: Theme.of(context).textTheme.caption,
+                        style: Theme.of(context).textTheme.bodySmall,
                         textAlign: TextAlign.center,
                       ),
                     ),

@@ -1,4 +1,4 @@
-import 'package:demo_tester/central_screen.dart';
+import 'package:demo_tester/testing/view/order/add_order_screen.dart';
 import 'package:demo_tester/testing/view/order/order_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:mysql1/mysql1.dart';
@@ -30,7 +30,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
     try {
       int? userId = Provider.of<UserProvider>(context, listen: false).userId;
       if (userId == null) {
-        print('User id null');
+        debugPrint('User id null');
         setState(() {
           isLoading = false;
         });
@@ -40,7 +40,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
       var results = await connection.query(
           'select hallo.lmao.*, hallo.customer.cust_name from hallo.DEMO natural join hallo.lmao join hallo.customer on hallo.customer.cust_id = hallo.lmao.cust_id where hallo.lmao.id = ?',
           [userId]);
-      print('Query executed, number of results: ${results.length}');
+      debugPrint('Query executed, number of results: ${results.length}');
 
       List<Order> fetchedOrders = [];
       for (var row in results) {
@@ -52,7 +52,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
         isLoading = false;
       });
     } catch (e) {
-      print('Error trying fetch: $e');
+      debugPrint('Error trying fetch: $e');
       setState(() {
         isLoading = false;
       });
@@ -63,21 +63,13 @@ class _OrderListScreenState extends State<OrderListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-          onPressed: () {
-            Navigator.of(context)
-                .pushReplacement(MaterialPageRoute(builder: (context) {
-              return const CentralScreen();
-            })); // Navigate back
-          },
-        ),
         title: const Text(
           'Your Orders',
           style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              letterSpacing: 2),
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            letterSpacing: 2,
+          ),
         ),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
@@ -93,40 +85,58 @@ class _OrderListScreenState extends State<OrderListScreen> {
         ),
         elevation: 0, // Removes the shadow under the AppBar
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => {
+          Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+            return const AddOrderScreen();
+          }))
+        },
+        child: const Icon(Icons.add_rounded),
+      ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
+          : ListView.separated(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 10.0),
               itemCount: orders.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 8.0),
               itemBuilder: (context, index) {
                 var order = orders[index];
                 return Card(
                   elevation: 4,
                   child: ListTile(
-                    title: Text('order id: ${order.lmao_id}'),
+                    title: Text(
+                      "Order Id: ${order.lmaoId}",
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Vendor id: ${order.id}'),
-                        Text('Customer id: ${order.cust_id}'),
-                        Text('Order no: ${order.order_number}'),
-                        Text('Customer name: ${order.cust_name}'),
+                        Text('Customer id: ${order.custId}'),
+                        Text('Order no: ${order.orderNumber}'),
+                        Text('Customer name: ${order.custName}'),
                         Text('Order status: ${order.status}'),
                       ],
                     ),
                     trailing: GestureDetector(
                       child: IconButton(
                         onPressed: () {
-                          print('Delete btn presssed');
+                          debugPrint('Delete btn presssed');
                         },
-                        icon: const Icon(Icons.delete),
+                        icon: const Icon(Icons.delete_rounded)
                       ),
                     ),
                     onTap: () {
-                      print('List tile pressed');
+                      debugPrint('List tile pressed');
                       //save to provider
                       Provider.of<OrderProvider>(context, listen: false)
-                          .setOrderId(order.lmao_id);
-                      Navigator.pushReplacement(context,
+                          .setOrderId(order.lmaoId);
+                      Navigator.push(context,
                           MaterialPageRoute(builder: (context) {
                         return const OrderDetailScreen();
                       }));

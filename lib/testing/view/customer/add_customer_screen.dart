@@ -27,7 +27,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
       //get provider
       int? userId = Provider.of<UserProvider>(context, listen: false).userId;
       if (userId == null) {
-        print('user id null');
+        debugPrint('user id null');
       }
       //get conn
       MySqlConnection connection = await Mysql().connection;
@@ -39,7 +39,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
           [userId, customerName]);
       return 'Customer added!';
     } catch (e) {
-      print('Error adding customer: $e');
+      debugPrint('Error adding customer: $e');
       return 'Error adding customer';
     }
   }
@@ -55,12 +55,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
               TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
-                    if (message == 'Customer added!') {
-                      Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (context) {
-                        return const CustomerListScreen();
-                      }));
-                    }
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
                   },
                   child: const Text('OK'))
             ],
@@ -100,15 +96,6 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
-          onPressed: () {
-            Navigator.of(context)
-                .pushReplacement(MaterialPageRoute(builder: (context) {
-              return const CustomerListScreen();
-            }));
-          },
-        ),
         title: const Text(
           'Add Customer',
           style: TextStyle(

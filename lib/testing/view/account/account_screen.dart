@@ -28,7 +28,7 @@ class _AccountScreenState extends State<AccountScreen> {
     try {
       int? userId = Provider.of<UserProvider>(context, listen: false).userId;
       if (userId == null) {
-        print('User id null');
+        debugPrint('User id null');
         return;
       }
       MySqlConnection connection = await Mysql().connection;
@@ -43,7 +43,7 @@ class _AccountScreenState extends State<AccountScreen> {
         });
       }
     } catch (e) {
-      print('Error fetching user: $e');
+      debugPrint('Error fetching user: $e');
     }
   }
 
@@ -154,7 +154,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   },
                   child: const Text('Cancel')),
               ElevatedButton(
-                  style: ButtonStyle(),
+                  style: const ButtonStyle(),
                   onPressed: () {
                     Navigator.of(context).pop();
                     Navigator.pushReplacement(

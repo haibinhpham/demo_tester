@@ -1,28 +1,27 @@
-import 'package:demo_tester/testing/model/user.dart';
-
 class Order {
-  final int lmao_id;
+  final int lmaoId;
   final int id;
-  final int cust_id;
-  final String order_number;
-  final String cust_name;
+  final int custId;
+  final String orderNumber;
+  final String custName;
   final String status;
 
-  Order(
-      {required this.lmao_id,
-      required this.id,
-      required this.cust_id,
-      required this.order_number,
-      required this.cust_name,
-      required this.status});
+  Order({
+    required this.lmaoId,
+    required this.id,
+    required this.custId,
+    required this.orderNumber,
+    required this.custName,
+    required this.status,
+  });
 
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(
-      lmao_id: json['lmao_id'],
+      lmaoId: json['lmao_id'],
       id: json['id'],
-      cust_id: json['cust_id'],
-      order_number: json['order_number'],
-      cust_name: json['cust_name'],
+      custId: json['cust_id'],
+      orderNumber: json['order_number'],
+      custName: json['cust_name'],
       status: json['status'],
     );
   }

@@ -32,14 +32,14 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       //get provider
       int? userId = Provider.of<UserProvider>(context, listen: false).userId;
       if (userId == null) {
-        print('User id null');
+        debugPrint('User id null');
         return;
       }
       //get connection
       MySqlConnection connection = await Mysql().connection;
       var results = await connection.query(
           'select * from hallo.item where id = ? and item_id = ?',
-          [userId, widget.item.item_id]);
+          [userId, widget.item.itemId]);
 
       if (results.isNotEmpty) {
         var userData = results.first.fields;
@@ -56,7 +56,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       setState(() {
         isLoading = false;
       });
-      print('Error get item details: $e');
+      debugPrint('Error get item details: $e');
     }
   }
 
@@ -69,13 +69,13 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       //update operation
       await connection.query(
           'update hallo.item set hallo.item.quantity = ? where hallo.item.id = ? and hallo.item.item_id = ?',
-          [quantity, userId, widget.item.item_id]);
+          [quantity, userId, widget.item.itemId]);
 
       //reload the page
       fetchItemDetails();
-      print('Quantity updated');
+      debugPrint('Quantity updated');
     } catch (e) {
-      print('Error updating quantity: $e');
+      debugPrint('Error updating quantity: $e');
     }
   }
 
@@ -88,11 +88,11 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       //update operation
       await connection.query(
           'update hallo.item set hallo.item.item_name = ? where hallo.item.id = ? and hallo.item.item_id = ?',
-          [value, userId, widget.item.item_id]);
+          [value, userId, widget.item.itemId]);
       //reload the page
       fetchItemDetails();
     } catch (e) {
-      print('Error updating name: $e');
+      debugPrint('Error updating name: $e');
     }
   }
 
@@ -100,15 +100,6 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-          onPressed: () {
-            Navigator.of(context)
-                .pushReplacement(MaterialPageRoute(builder: (context) {
-              return const ItemListScreen();
-            })); // Navigate back
-          },
-        ),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -146,13 +137,13 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                   ),
                   const SizedBox(height: 40),
                   Text(
-                    item.item_name,
+                    item.itemName,
                     style: const TextStyle(
                         fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'ID: ${item.item_id}',
+                    'ID: ${item.itemId}',
                     style: const TextStyle(fontSize: 18),
                   ),
                   const SizedBox(height: 8),
@@ -205,7 +196,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   }
 
   void _showUpdateDialog(String field) {
-    final TextEditingController _controller = TextEditingController();
+    final TextEditingController controller = TextEditingController();
 
     showDialog(
         context: context,
@@ -214,7 +205,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             title: Text('Update $field'),
             content: SingleChildScrollView(
               child: TextField(
-                controller: _controller,
+                controller: controller,
                 decoration: InputDecoration(hintText: 'Enter new $field'),
                 keyboardType: field == 'Quantity'
                     ? TextInputType.number
@@ -230,17 +221,17 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               TextButton(
                 onPressed: () {
                   if (field == 'Quantity') {
-                    if (int.tryParse(_controller.text) == null) {
+                    if (int.tryParse(controller.text) == null) {
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                           content: Text('Please enter a valid number')));
                     } else {
-                      print('Update $field');
-                      updateItemQuantity(int.parse(_controller.text));
+                      debugPrint('Update $field');
+                      updateItemQuantity(int.parse(controller.text));
                       //perform update login
                       Navigator.of(context).pop();
                     }
                   } else {
-                    print('Update $field');
+                    debugPrint('Update $field');
                     Navigator.of(context).pop();
                   }
                 },
@@ -250,6 +241,4 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           );
         });
   }
-
-  Widget _gap() => const SizedBox(height: 16);
 }

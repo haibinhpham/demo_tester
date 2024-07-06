@@ -1,6 +1,5 @@
 import 'package:demo_tester/testing/controller/provider/customer_provider.dart';
 import 'package:demo_tester/testing/model/mysql.dart';
-import 'package:demo_tester/testing/view/customer/customer_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:provider/provider.dart';
@@ -37,7 +36,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       int? custId =
           Provider.of<CustomerProvider>(context, listen: false).custId;
       if (custId == null) {
-        print('customer id is null');
+        debugPrint('customer id is null');
         return;
       }
       //get conn
@@ -47,7 +46,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
           .query('select * from hallo.customer where cust_id = ?', [custId]);
 
       if (customerResult.isEmpty) {
-        print('Customer not found');
+        debugPrint('Customer not found');
         return;
       }
 
@@ -56,7 +55,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       Provider.of<CustomerProvider>(context, listen: false)
           .setCustomerInfo(customer);
     } catch (e) {
-      print('Error fetching customer details: $e');
+      debugPrint('Error fetching customer details: $e');
     }
   }
 
@@ -65,7 +64,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       int? custId =
           Provider.of<CustomerProvider>(context, listen: false).custId;
       if (custId == null) {
-        print('customer id is null');
+        debugPrint('customer id is null');
         return;
       }
 
@@ -82,7 +81,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       Provider.of<CustomerProvider>(context, listen: false)
           .setCustomerOrders(orders);
     } catch (e) {
-      print('Error fetching customer orders: $e');
+      debugPrint('Error fetching customer orders: $e');
     }
   }
 
@@ -92,18 +91,6 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios,
-            color: Colors.white,
-          ),
-          onPressed: () {
-            Navigator.of(context)
-                .pushReplacement(MaterialPageRoute(builder: (context) {
-              return const CustomerListScreen();
-            }));
-          },
-        ),
         title: const Text(
           'Customer Details',
           style: TextStyle(
@@ -139,12 +126,12 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                         margin: const EdgeInsets.symmetric(vertical: 8),
                         child: ListTile(
                           title: Text(
-                              'Customer ID: ${customerProvider.customerInfo!.cust_id}'),
+                              'Customer ID: ${customerProvider.customerInfo!.custId}'),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                  'Name: ${customerProvider.customerInfo!.cust_name}'),
+                                  'Name: ${customerProvider.customerInfo!.custName}'),
                               // Text(
                               //     'Email: ${customerProvider.customerInfo!.custEmail}'),
                               // Text(
@@ -171,7 +158,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                             ),
                           ),
                         );
-                      }).toList(),
+                      }),
                     ],
                   ),
                 ),

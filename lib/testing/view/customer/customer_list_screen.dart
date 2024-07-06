@@ -1,4 +1,3 @@
-import 'package:demo_tester/central_screen.dart';
 import 'package:demo_tester/testing/controller/provider/customer_provider.dart';
 import 'package:demo_tester/testing/controller/provider/user_provider.dart';
 import 'package:demo_tester/testing/model/mysql.dart';
@@ -34,7 +33,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
       //get provider
       int? userId = Provider.of<UserProvider>(context, listen: false).userId;
       if (userId == null) {
-        print('User id is null');
+        debugPrint('User id is null');
         setState(() {
           isLoading = false;
         });
@@ -45,7 +44,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
           'select hallo.customer.* from hallo.customer natural join hallo.DEMO where hallo.DEMO.id = ?',
           [userId]);
 
-      print('Query executed, number of results: ${results.length}');
+      debugPrint('Query executed, number of results: ${results.length}');
 
       List<Customer> fetchedCustomers = [];
       for (var row in results) {
@@ -57,7 +56,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
         isLoading = false;
       });
     } catch (e) {
-      print('Error fetching customers: $e');
+      debugPrint('Error fetching customers: $e');
       setState(() {
         isLoading = false;
       });
@@ -81,7 +80,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
       fetchAllCustomers();
       return 'Delete Successful';
     } catch (e) {
-      print('Error deleting item: $e');
+      debugPrint('Error deleting item: $e');
       return 'Delete Error';
     }
   }
@@ -133,22 +132,9 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios,
-            color: Colors.white,
-          ),
-          onPressed: () {
-            Navigator.of(context)
-                .pushReplacement(MaterialPageRoute(builder: (context) {
-              return const CentralScreen();
-            }));
-          },
-        ),
         title: const Text(
           'Your Customers',
           style: TextStyle(
-              fontSize: 28,
               fontWeight: FontWeight.bold,
               color: Colors.white,
               letterSpacing: 2),
@@ -185,14 +171,14 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                       children: [
                         IconButton(
                             onPressed: () {
-                              print('Filter btn pressed');
+                              debugPrint('Filter btn pressed');
                             },
                             icon: const Icon(CupertinoIcons.layers_alt)),
                         GestureDetector(
                           child: IconButton(
                               onPressed: () {
-                                print('Add btn pressed');
-                                Navigator.pushReplacement(context,
+                                debugPrint('Add btn pressed');
+                                Navigator.push(context,
                                     MaterialPageRoute(builder: (context) {
                                   return const AddCustomerScreen();
                                 }));
@@ -213,76 +199,66 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                         elevation: 5,
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(18.0),
-                          child: Container(
-                            // decoration: const BoxDecoration(
-                            //     gradient: LinearGradient(
-                            //         begin: Alignment.topCenter,
-                            //         end: Alignment.bottomCenter,
-                            //         colors: [
-                            //       Colors.white,
-                            //       Colors.lightBlueAccent,
-                            //     ])),
-                            child: ListTile(
-                              leading: const Icon(
-                                Icons.person,
-                                size: 30,
-                                color: Colors.black,
+                          child: ListTile(
+                            leading: const Icon(
+                              Icons.person,
+                              size: 30,
+                              color: Colors.black,
+                            ),
+                            title: Text(
+                              'Name: ${customer.custName}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue,
                               ),
-                              title: Text(
-                                'Name: ${customer.cust_name}',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                ),
+                            ),
+                            subtitle: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Id: ${customer.custId}',
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                                  _gap(),
+                                  //todo add from db
+                                  const Text(
+                                    'Phone: 1111111',
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                  _gap(),
+                                  //todo add from db
+                                  const Text(
+                                    'Address: 11 Yilong Str. Shenzhen',
+                                    style: TextStyle(fontSize: 13),
+                                  ),
+                                  _gap(),
+                                ],
                               ),
-                              subtitle: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Id: ${customer.cust_id}',
-                                      style: const TextStyle(fontSize: 16),
-                                    ),
-                                    _gap(),
-                                    //todo add from db
-                                    Text(
-                                      'Phone: 1111111',
-                                      style: TextStyle(fontSize: 16),
-                                    ),
-                                    _gap(),
-                                    //todo add from db
-                                    Text(
-                                      'Address: 11 Yilong Str. Shenzhen',
-                                      style: TextStyle(fontSize: 13),
-                                    ),
-                                    _gap(),
-                                  ],
-                                ),
-                              ),
-                              trailing: GestureDetector(
-                                child: const Icon(
-                                  Icons.delete,
-                                  color: Colors.grey,
-                                ),
-                                onTap: () {
-                                  _showConfirmationDialog(customer.cust_id);
-                                  print('Delete icon pressed');
-                                },
+                            ),
+                            trailing: GestureDetector(
+                              child: const Icon(
+                                Icons.delete,
+                                color: Colors.grey,
                               ),
                               onTap: () {
-                                print('List Tile pressed');
-                                //save to provider
-                                Provider.of<CustomerProvider>(context,
-                                        listen: false)
-                                    .setCustomerId(customer.cust_id);
-                                Navigator.push(context,
-                                    MaterialPageRoute(builder: (context) {
-                                  return const CustomerDetailScreen();
-                                }));
+                                _showConfirmationDialog(customer.custId);
+                                debugPrint('Delete icon pressed');
                               },
                             ),
+                            onTap: () {
+                              debugPrint('List Tile pressed');
+                              //save to provider
+                              Provider.of<CustomerProvider>(context,
+                                      listen: false)
+                                  .setCustomerId(customer.custId);
+                              Navigator.push(context,
+                                  MaterialPageRoute(builder: (context) {
+                                return const CustomerDetailScreen();
+                              }));
+                            },
                           ),
                         ),
                       );

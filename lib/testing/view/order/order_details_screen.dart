@@ -2,7 +2,6 @@ import 'package:demo_tester/testing/controller/provider/order_provider.dart';
 import 'package:demo_tester/testing/model/mysql.dart';
 import 'package:demo_tester/testing/model/order_details/order_details.dart';
 import 'package:demo_tester/testing/model/order_details/order_display.dart';
-import 'package:demo_tester/testing/view/order/order_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:provider/provider.dart';
@@ -29,7 +28,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     try {
       int? orderId = Provider.of<OrderProvider>(context, listen: false).orderId;
       if (orderId == null) {
-        print('order id is null');
+        debugPrint('order id is null');
         setState(() {
           isLoading = false;
         });
@@ -42,7 +41,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           [orderId]);
 
       if (orderResults.isEmpty) {
-        print('Order not found');
+        debugPrint('Order not found');
         setState(() {
           isLoading = false;
         });
@@ -64,7 +63,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         isLoading = false;
       });
     } catch (e) {
-      print('Error fetching order details: $e');
+      debugPrint('Error fetching order details: $e');
       setState(() {
         isLoading = false;
       });
@@ -75,7 +74,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     try {
       int? orderId = Provider.of<OrderProvider>(context, listen: false).orderId;
       if (orderId == null) {
-        print('order id is null');
+        debugPrint('order id is null');
         return;
       }
       MySqlConnection connection = await Mysql().connection;
@@ -86,7 +85,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       //refresh page
       fetchOrderDetails();
     } catch (e) {
-      print('Error updating order status: $e');
+      debugPrint('Error updating order status: $e');
     }
   }
 
@@ -94,15 +93,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-          onPressed: () {
-            Navigator.of(context)
-                .pushReplacement(MaterialPageRoute(builder: (context) {
-              return const OrderListScreen();
-            })); // Navigate back
-          },
-        ),
         title: const Text(
           'Order Details',
           style: TextStyle(
@@ -138,16 +128,16 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         Card(
                           margin: const EdgeInsets.symmetric(vertical: 8),
                           child: ListTile(
-                            title: Text('Order ID: ${orderDisplay!.lmao_id}'),
+                            title: Text('Order ID: ${orderDisplay!.lmaoId}'),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('Vendor ID: ${orderDisplay!.id}'),
-                                Text('Customer ID: ${orderDisplay!.cust_id}'),
+                                Text('Customer ID: ${orderDisplay!.custId}'),
                                 Text(
-                                    'Order desc: ${orderDisplay!.order_number}'),
+                                    'Order desc: ${orderDisplay!.orderNumber}'),
                                 Text(
-                                    'Customer name: ${orderDisplay!.cust_name}'),
+                                    'Customer name: ${orderDisplay!.custName}'),
                                 Text('Status: ${orderDisplay!.status}'),
                               ],
                             ),
@@ -159,17 +149,17 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                           return Card(
                             elevation: 2,
                             child: ListTile(
-                              title: Text('Item id: ${detail.item_id}'),
+                              title: Text('Item id: ${detail.itemId}'),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Item Name: ${detail.item_name}'),
-                                  Text('Quantity: ${detail.lmao_quantity}'),
+                                  Text('Item Name: ${detail.itemName}'),
+                                  Text('Quantity: ${detail.lmaoQuantity}'),
                                 ],
                               ),
                             ),
                           );
-                        }).toList(),
+                        }),
                         _gap(),
                         const Text('Update Order Status:'),
                         DropdownButton<String>(

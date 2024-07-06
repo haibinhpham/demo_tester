@@ -1,11 +1,8 @@
-import 'package:demo_tester/central_screen.dart';
 import 'package:demo_tester/testing/controller/provider/user_provider.dart';
-import 'package:demo_tester/testing/view/home_screen.dart';
 import 'package:demo_tester/testing/view/item/add_item_screen.dart';
 import 'package:demo_tester/testing/view/item/item_details_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:provider/provider.dart';
 
@@ -34,7 +31,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
     try {
       int? userId = Provider.of<UserProvider>(context, listen: false).userId;
       if (userId == null) {
-        print('User id null');
+        debugPrint('User id null');
         setState(() {
           isLoading = false;
         });
@@ -44,7 +41,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
       var results = await connection.query(
           'select hallo.item.* from hallo.item natural join hallo.DEMO where hallo.DEMO.id = ?',
           [userId]);
-      print('Query executed, number of results: ${results.length}');
+      debugPrint('Query executed, number of results: ${results.length}');
 
       List<Item> fetchedItems = [];
       for (var row in results) {
@@ -56,7 +53,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
         isLoading = false;
       });
     } catch (e) {
-      print('Error trying fetch: $e');
+      debugPrint('Error trying fetch: $e');
       setState(() {
         isLoading = false;
       });
@@ -81,7 +78,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
       fetchAllItems();
       return 'Delete Successful';
     } catch (e) {
-      print('Error deleteing item: $e');
+      debugPrint('Error deleteing item: $e');
       return 'Delete Error';
     }
   }
@@ -133,20 +130,10 @@ class _ItemListScreenState extends State<ItemListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-          onPressed: () {
-            Navigator.of(context)
-                .pushReplacement(MaterialPageRoute(builder: (context) {
-              return const CentralScreen();
-            }));
-          },
-        ),
         elevation: 2,
         title: const Text(
           'Your Items',
           style: TextStyle(
-              fontSize: 28,
               fontWeight: FontWeight.bold,
               color: Colors.white,
               letterSpacing: 2),
@@ -181,14 +168,14 @@ class _ItemListScreenState extends State<ItemListScreen> {
                       children: [
                         IconButton(
                             onPressed: () {
-                              print('Filter btn pressed');
+                              debugPrint('Filter btn pressed');
                             },
                             icon: const Icon(CupertinoIcons.layers_alt)),
                         GestureDetector(
                           child: IconButton(
                               onPressed: () {
-                                print('Add btn pressed');
-                                Navigator.pushReplacement(context,
+                                debugPrint('Add btn pressed');
+                                Navigator.push(context,
                                     MaterialPageRoute(builder: (context) {
                                   return const AddItemScreen();
                                 }));
@@ -218,7 +205,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
                               ),
                             ),
                             title: Text(
-                              'Name: ${item.item_name}',
+                              'Name: ${item.itemName}',
                               style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -228,9 +215,9 @@ class _ItemListScreenState extends State<ItemListScreen> {
                               padding: const EdgeInsets.all(8.0),
                               child: Row(
                                 children: [
-                                  Text('Id: ${item.item_id}',
+                                  Text('Id: ${item.itemId}',
                                       style: const TextStyle(fontSize: 16)),
-                                  SizedBox(width: 16),
+                                  const SizedBox(width: 16.0),
                                   Text('Quantity: ${item.quantity}',
                                       style: const TextStyle(fontSize: 16)),
                                 ],
@@ -242,12 +229,12 @@ class _ItemListScreenState extends State<ItemListScreen> {
                                 color: Colors.grey,
                               ),
                               onTap: () {
-                                _showConfirmationDialog(item.item_id);
-                                print('Delete icon pressed');
+                                _showConfirmationDialog(item.itemId);
+                                debugPrint('Delete icon pressed');
                               },
                             ),
                             onTap: () {
-                              print('List Tile Pressed');
+                              debugPrint('List Tile Pressed');
                               Navigator.push(context,
                                   MaterialPageRoute(builder: (context) {
                                 return ItemDetailScreen(item: item);

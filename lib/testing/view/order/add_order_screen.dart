@@ -1,4 +1,3 @@
-import 'package:demo_tester/central_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:provider/provider.dart';
@@ -78,7 +77,7 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
       //get provider
       int? userId = Provider.of<UserProvider>(context, listen: false).userId;
       if (userId == null) {
-        print('User id is null');
+        debugPrint('User id is null');
         return;
       }
       //get conn
@@ -101,7 +100,7 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
         isLoadingCustomers = false;
       });
     } catch (e) {
-      print('Error fetching customer names: $e');
+      debugPrint('Error fetching customer names: $e');
       setState(() {
         isLoadingCustomers = false;
       });
@@ -113,7 +112,7 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
       //get provider
       int? userId = Provider.of<UserProvider>(context, listen: false).userId;
       if (userId == null) {
-        print('User id is null');
+        debugPrint('User id is null');
       }
       //get conn
       MySqlConnection connection = await Mysql().connection;
@@ -132,7 +131,7 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
         isLoadingItems = false;
       });
     } catch (e) {
-      print('Error fetching item names: $e');
+      debugPrint('Error fetching item names: $e');
       setState(() {
         isLoadingItems = false;
       });
@@ -173,7 +172,7 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                               content: Text(
-                                  'Quantity exceeds available stock (${availableQuantity}')));
+                                  'Quantity exceeds available stock ($availableQuantity)')));
                         }
                       }
                     },
@@ -189,7 +188,7 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
       //get provider
       int? userId = Provider.of<UserProvider>(context, listen: false).userId;
       if (userId == null) {
-        print('user id is null');
+        debugPrint('user id is null');
         return;
       }
       //get conn
@@ -216,7 +215,7 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
               [entry.key, userId]);
 
           if (itemResult.isEmpty) {
-            print('Item not found: ${entry.key}');
+            debugPrint('Item not found: ${entry.key}');
             throw Exception('Item not found: ${entry.key}');
           }
 
@@ -224,7 +223,7 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
           int currentQuantity = itemResult.first['quantity'];
 
           if (entry.value > currentQuantity) {
-            print('Not enough stock for item: ${entry.key}');
+            debugPrint('Not enough stock for item: ${entry.key}');
             throw Exception('Not enough stock for item: ${entry.key}');
           }
           //insert into lmao details
@@ -237,11 +236,11 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
               'update hallo.item set quantity = quantity - ? where hallo.item.item_id = ?',
               [entry.value, itemId]);
         }
-        print('Order added successfully');
+        debugPrint('Order added successfully');
         clearFormFields();
       });
     } catch (e) {
-      print('Error performing query $e');
+      debugPrint('Error performing query $e');
     }
   }
 
@@ -258,130 +257,133 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Order'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
-          onPressed: () {
-            Navigator.pushReplacement(context,
-                MaterialPageRoute(builder: (context) {
-              return const CentralScreen();
-            }));
-          },
+        title: const Text(
+          'Add Order',
+          style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              letterSpacing: 2),
+        ),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                Colors.deepPurple,
+                Colors.blue,
+              ])),
         ),
       ),
       body: (isLoadingCustomers || isLoadingItems)
           ? const Center(child: CircularProgressIndicator())
           : Form(
               key: _formKey,
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: Container(
-                  padding: const EdgeInsets.all(32.0),
-                  constraints: const BoxConstraints(maxWidth: 350),
-                  child: SingleChildScrollView(
-                    child: Column(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0, vertical: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'Add New Order',
+                      style: Theme.of(context).textTheme.bodySmall,
+                      textAlign: TextAlign.center,
+                    ),
+                    _gap(),
+                    TextFormField(
+                      controller: _orderNumberController,
+                      decoration: const InputDecoration(
+                        labelText: 'Order Number',
+                        hintText: 'Enter order number',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    _gap(),
+                    DropdownButton<String>(
+                        isExpanded: true,
+                        value: selectedCustomer,
+                        hint: const Text('Select Customer'),
+                        items: customerNames.map((name) {
+                          return DropdownMenuItem<String>(
+                            value: name,
+                            child: Text(name),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedCustomer = value;
+                          });
+                        }),
+                    _gap(),
+                    Row(
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          child: Text(
-                            'Add New Order',
-                            style: Theme.of(context).textTheme.caption,
-                            textAlign: TextAlign.center,
-                          ),
+                        Expanded(
+                          child: DropdownButton<String>(
+                              isExpanded: true,
+                              value: selectedItem,
+                              hint: const Text('Select Item'),
+                              items: items.map((item) {
+                                return DropdownMenuItem<String>(
+                                  value: item['item_name'],
+                                  child: Text(
+                                      '${item['item_name']} (${item['quantity']})'),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedItem = value;
+                                });
+                              }),
                         ),
-                        _gap(),
-                        TextFormField(
-                          controller: _orderNumberController,
-                          decoration: const InputDecoration(
-                            labelText: 'Order Number',
-                            hintText: 'Enter order number',
-                            border: OutlineInputBorder(),
-                          ),
+                        IconButton(
+                          icon: const Icon(Icons.add),
+                          onPressed: addItem,
                         ),
-                        _gap(),
-                        DropdownButton<String>(
-                            value: selectedCustomer,
-                            hint: const Text('Select Customer'),
-                            items: customerNames.map((name) {
-                              return DropdownMenuItem<String>(
-                                value: name,
-                                child: Text(name),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                selectedCustomer = value;
-                              });
-                            }),
-                        _gap(),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: DropdownButton<String>(
-                                  value: selectedItem,
-                                  hint: const Text('Select Item'),
-                                  items: items.map((item) {
-                                    return DropdownMenuItem<String>(
-                                      value: item['item_name'],
-                                      child: Text(
-                                          '${item['item_name']} (${item['quantity']})'),
-                                    );
-                                  }).toList(),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      selectedItem = value;
-                                    });
-                                  }),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.add),
-                              onPressed: addItem,
-                            ),
-                          ],
-                        ),
-                        _gap(),
-                        Container(
-                          padding: const EdgeInsets.all(8.0),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: selectedItems.entries.map((entry) {
-                              return Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 4.0),
-                                child: Text(
-                                    '${entry.key} - Quantity: ${entry.value}'),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                        _gap(),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
-                            onPressed: () async {
-                              await performAddOrder();
-                            },
-                            child: const Padding(
-                              padding: EdgeInsets.all(10.0),
-                              child: Text('Add New Order',
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold)),
-                            ),
-                          ),
-                        )
                       ],
                     ),
-                  ),
+                    _gap(),
+                    const Text("Added Items: ",
+                        style: TextStyle(fontWeight: FontWeight.w500)),
+                    selectedItems.entries.isEmpty
+                        ? const Text("No items have been added")
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: selectedItems.entries.map((entry) {
+                              return Card(
+                                color: Colors.white,
+                                child: ListTile(
+                                  title: Text(entry.key),
+                                  subtitle: Text("Qty: ${entry.value}"),
+                                  trailing: IconButton(onPressed: ()=> setState(()=>selectedItems.remove(entry.key)), icon: Icon(Icons.delete_rounded))
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                    _gap(),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                        onPressed: () async {
+                          if(_formKey.currentState!.validate()){
+
+                          }
+                          await performAddOrder();
+                        },
+                        child: const Padding(
+                          padding: EdgeInsets.all(10.0),
+                          child: Text('Add New Order',
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold)),
+                        ),
+                      ),
+                    )
+                  ],
                 ),
               ),
             ),

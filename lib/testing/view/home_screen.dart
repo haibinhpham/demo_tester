@@ -1,10 +1,6 @@
-import 'dart:ui';
-
-import 'package:demo_tester/testing/view/customer/customer_list_screen.dart';
-import 'package:demo_tester/testing/view/item/item_list_screen.dart';
+import 'package:demo_tester/testing/controller/provider/home_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:provider/provider.dart';
 import '../controller/provider/user_provider.dart';
@@ -25,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       int? userId = Provider.of<UserProvider>(context, listen: false).userId;
       if (userId == null) {
-        print('User id null');
+        debugPrint('User id null');
         return;
       }
       MySqlConnection connection = await Mysql().connection;
@@ -40,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       }
     } catch (e) {
-      print('Error fetching user: $e');
+      debugPrint('Error fetching user: $e');
     }
   }
 
@@ -62,12 +58,16 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Icon(CupertinoIcons.camera_on_rectangle),
             ),
             const SizedBox(width: 8),
-            Text(
-              user == null ? 'Loading...' : 'Welcome, ${user!.fname}!',
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 24),
+            Flexible(
+              child: FittedBox(
+                child: Text(
+                  user == null ? 'Loading...' : 'Welcome, ${user!.fname}!',
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 24),
+                ),
+              ),
             ),
           ],
         ),
@@ -96,85 +96,97 @@ class _HomeScreenState extends State<HomeScreen> {
         child: user == null
             ? const Center(child: CircularProgressIndicator())
             : Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4)),
-                            ),
-                            child: const Padding(
-                              padding: EdgeInsets.all(10.0),
-                              child: Text(
-                                'Customer Management',
-                                style: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold),
+                padding: const EdgeInsets.all(24.0),
+                child: GridView.count(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 16.0,
+                  crossAxisSpacing: 16.0,
+                  children: [
+                    Card(
+                      child: Consumer<HomeProvider>(builder: (_, provider, __) {
+                        return InkWell(
+                          onTap: () {
+                            debugPrint('${provider.pageIndex}');
+                            provider.pageIndex = 1;
+                            debugPrint('${provider.pageIndex}');
+                          },
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const CircleAvatar(
+                                backgroundColor: Colors.lightBlue,
+                                child: Icon(
+                                  Icons.shopping_cart_rounded,
+                                  color: Colors.white,
+                                ),
                               ),
-                            ),
-                            onPressed: () async {
-                              Navigator.pushReplacement(context,
-                                  MaterialPageRoute(builder: ((context) {
-                                return const CustomerListScreen();
-                              })));
-                            },
+                              _gap(),
+                              Text(
+                                "Manage Order",
+                                style: Theme.of(context).textTheme.titleSmall,
+                              )
+                            ],
                           ),
-                        ),
-                        _gap(),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4)),
-                            ),
-                            child: const Padding(
-                              padding: EdgeInsets.all(10.0),
-                              child: Text(
-                                'Inventory Management',
-                                style: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            onPressed: () async {
-                              Navigator.pushReplacement(context,
-                                  MaterialPageRoute(builder: ((context) {
-                                return const ItemListScreen();
-                              })));
-                            },
-                          ),
-                        ),
-                        _gap(),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4)),
-                            ),
-                            child: const Padding(
-                              padding: EdgeInsets.all(10.0),
-                              child: Text(
-                                'Orders Management',
-                                style: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            onPressed: () async {},
-                          ),
-                        ),
-
-                        // Add more fields as needed
-                      ],
+                        );
+                      }),
                     ),
-                  ),
+                    Card(
+                      child: Consumer<HomeProvider>(builder: (_, provider, __) {
+                        return InkWell(
+                          onTap: () {
+                            debugPrint('${provider.pageIndex}');
+                            provider.pageIndex = 2;
+                            debugPrint('${provider.pageIndex}');
+                          },
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const CircleAvatar(
+                                backgroundColor: Colors.lightBlue,
+                                child: Icon(
+                                  Icons.inventory_rounded,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              _gap(),
+                              Text(
+                                "Manage Item",
+                                style: Theme.of(context).textTheme.titleSmall,
+                              )
+                            ],
+                          ),
+                        );
+                      }),
+                    ),
+                    Card(
+                      child: Consumer<HomeProvider>(builder: (_, provider, __) {
+                        return InkWell(
+                          onTap: () {
+                            debugPrint('${provider.pageIndex}');
+                            provider.pageIndex = 3;
+                            debugPrint('${provider.pageIndex}');
+                          },
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const CircleAvatar(
+                                backgroundColor: Colors.lightBlue,
+                                child: Icon(
+                                  Icons.person_rounded,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              _gap(),
+                              Text(
+                                "Manage Customer",
+                                style: Theme.of(context).textTheme.titleSmall,
+                              )
+                            ],
+                          ),
+                        );
+                      }),
+                    ),
+                  ],
                 ),
               ),
       ),
