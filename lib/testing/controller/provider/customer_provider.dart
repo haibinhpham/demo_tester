@@ -21,4 +21,11 @@ class CustomerProvider extends ChangeNotifier {
     customerOrders = orders;
     notifyListeners();
   }
+
+  void clearCustomerData() {
+    custId = null;
+    customerInfo = null;
+    customerOrders = [];
+    notifyListeners();
+  }
 }

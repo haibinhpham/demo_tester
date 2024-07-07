@@ -27,6 +27,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
   }
 
   Future<void> fetchCustomerData() async {
+    //clear states
     Provider.of<CustomerProvider>(context, listen: false).setCustomerOrders([]);
     await fetchCustomerDetails();
     await fetchCustomerOrders();

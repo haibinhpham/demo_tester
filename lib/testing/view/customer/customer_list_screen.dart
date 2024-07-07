@@ -60,6 +60,8 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
         });
         return;
       }
+      Provider.of<CustomerProvider>(context, listen: false).clearCustomerData();
+
       MySqlConnection connection = await Mysql().connection;
       var results = await connection.query(
           'select Production.customers.* from Production.customers natural join Production.users where Production.users.user_id = ? and is_deleted = false',
@@ -199,9 +201,13 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                   ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: !isSearching ? customers.length :filteredCustomers.length,
+                    itemCount: !isSearching
+                        ? customers.length
+                        : filteredCustomers.length,
                     itemBuilder: (context, index) {
-                      var customer = !isSearching ?customers[index] : filteredCustomers[index];
+                      var customer = !isSearching
+                          ? customers[index]
+                          : filteredCustomers[index];
                       return Card.outlined(
                         margin: const EdgeInsets.symmetric(vertical: 8.0),
                         child: ClipRRect(
