@@ -1,6 +1,6 @@
 # demo_tester
 
-A new Flutter project.
+A new Flutter project; the OOSMT for ProgEx
 
 ## Getting Started
 
