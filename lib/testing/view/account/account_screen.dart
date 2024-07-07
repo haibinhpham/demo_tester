@@ -50,16 +50,6 @@ class _AccountScreenState extends State<AccountScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        // appBar: AppBar(
-        //   title: const Text('Profile',
-        //       style: TextStyle(
-        //         letterSpacing: 4,
-        //         fontSize: 20,
-        //         fontWeight: FontWeight.bold,
-        //       )),
-        //   automaticallyImplyLeading: false,
-        //   centerTitle: true,
-        // ),
         body: user == null
             ? const Center(child: CircularProgressIndicator())
             : Scaffold(
@@ -78,10 +68,10 @@ class _AccountScreenState extends State<AccountScreen> {
                       ),
                       const SizedBox(height: 20),
                       itemProfile(
-                          'Name', user!.username, CupertinoIcons.person),
+                          'Username', user!.username, CupertinoIcons.person),
                       const SizedBox(height: 10),
-                      itemProfile(
-                          'Last Name', user!.password, CupertinoIcons.phone),
+                      itemProfile('Date Created', user!.createdAt.toString(),
+                          CupertinoIcons.calendar),
                       const SizedBox(height: 10),
                       itemProfile('Email', user!.email, CupertinoIcons.mail),
                       const SizedBox(height: 10),

@@ -3,7 +3,7 @@ class User {
   final String username;
   final String password;
   final String email;
-  final String createdAt;
+  final DateTime createdAt;
 
   User(
       {required this.userId,
