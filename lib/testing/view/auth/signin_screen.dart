@@ -22,15 +22,15 @@ class _SigninScreenState extends State<SigninScreen> {
   final TextEditingController _passwordController = TextEditingController();
 
   //login function
-  Future<int?> login(String userName, String password) async {
+  Future<int?> login(String email, String password) async {
     try {
       MySqlConnection connection = await Mysql().connection;
 
       var results = await connection.query(
-          'select id from hallo.DEMO where fname = ? and lname = ?',
-          [userName, password]);
+          'select user_id from Production.users where email = ? and password = ?',
+          [email, password]);
       if (results.isNotEmpty) {
-        return results.first['id'] as int;
+        return results.first['user_id'] as int;
       } else {
         return null;
       }
@@ -76,21 +76,19 @@ class _SigninScreenState extends State<SigninScreen> {
                     _gap(),
                     TextFormField(
                       controller: _emailController,
-                      // validator: (value) {
-                      //   // add email validation
-                      //   if (value == null || value.isEmpty) {
-                      //     return 'Please enter some text';
-                      //   }
-                      //
-                      //   bool emailValid = RegExp(
-                      //           r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                      //       .hasMatch(value);
-                      //   if (!emailValid) {
-                      //     return 'Please enter a valid email';
-                      //   }
-                      //
-                      //   return null;
-                      // },
+                      validator: (value) {
+                        // add email validation
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter some text';
+                        }
+                        bool emailValid = RegExp(
+                                r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                            .hasMatch(value);
+                        if (!emailValid) {
+                          return 'Please enter a valid email';
+                        }
+                        return null;
+                      },
                       decoration: const InputDecoration(
                         labelText: 'Email',
                         hintText: 'Enter your email',

@@ -61,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Flexible(
               child: FittedBox(
                 child: Text(
-                  user == null ? 'Loading...' : 'Welcome, ${user!.fname}!',
+                  user == null ? 'Loading...' : 'Welcome, ${user!.username}!',
                   style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,

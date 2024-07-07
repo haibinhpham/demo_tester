@@ -14,20 +14,20 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   bool _isPasswordVisible = false;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
 
   //registration functionality
   Future<String> register(
-      String userName, String password, String address) async {
+      String userName, String password, String email) async {
     try {
       MySqlConnection connection = await Mysql().connection;
 
       await connection.query(
-          'insert into hallo.DEMO(fname,lname,address) values (?,?,?)',
-          [userName, password, address]);
-      return 'Registered Sucessfull';
+          'insert into Production.users(username,email,password) values (?,?,?)',
+          [userName, email, password]);
+      return 'Registered Successfully';
     } catch (e) {
       debugPrint('Error with registration: $e');
       return 'Error registering';
@@ -69,39 +69,27 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     ),
                     _gap(),
                     TextFormField(
-                      controller: _emailController,
-                      // validator: (value){
-                      //   //add email validation
-                      //   if(value == null || value.isEmpty){
-                      //     return 'Please enter some text';
-                      //   }
-                      //   bool emailValid =  RegExp(
-                      //                 r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(value);
-                      //   if(!emailValid){
-                      //     return 'Please enter a valid email';
-                      //   }
-                      //   return null;
-                      // },
+                      controller: _usernameController,
                       decoration: const InputDecoration(
-                        labelText: 'Email',
-                        hintText: 'Enter your email',
-                        prefixIcon: Icon(Icons.email_outlined),
+                        labelText: 'Username',
+                        hintText: 'Enter your username',
+                        prefixIcon: Icon(Icons.person),
                         border: OutlineInputBorder(),
                       ),
                     ),
                     _gap(),
                     TextFormField(
                       controller: _passwordController,
-                      // validator: (value) {
-                      //   if (value == null || value.isEmpty) {
-                      //     return 'Please enter some text';
-                      //   }
-                      //
-                      //   if (value.length < 6) {
-                      //     return 'Password must be at least 6 characters';
-                      //   }
-                      //   return null;
-                      // },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter some text';
+                        }
+
+                        if (value.length < 6) {
+                          return 'Password must be at least 6 characters';
+                        }
+                        return null;
+                      },
                       obscureText: !_isPasswordVisible,
                       decoration: InputDecoration(
                           labelText: 'Password',
@@ -121,22 +109,24 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     ),
                     _gap(),
                     TextFormField(
-                      controller: _addressController,
+                      controller: _emailController,
                       validator: (value) {
+                        //add email validation
                         if (value == null || value.isEmpty) {
                           return 'Please enter some text';
                         }
-                        bool countryValid =
-                            RegExp("^[A-Za-z]+").hasMatch(value);
-                        if (!countryValid) {
-                          return 'Please enter correct country';
+                        bool emailValid = RegExp(
+                                r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                            .hasMatch(value);
+                        if (!emailValid) {
+                          return 'Please enter a valid email';
                         }
                         return null;
                       },
                       decoration: const InputDecoration(
-                        labelText: 'Country',
-                        hintText: 'Enter your country',
-                        prefixIcon: Icon(Icons.add_location_alt_rounded),
+                        labelText: 'Email',
+                        hintText: 'Enter your Email',
+                        prefixIcon: Icon(Icons.email_outlined),
                         border: OutlineInputBorder(),
                       ),
                     ),
@@ -161,12 +151,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         onPressed: () async {
                           if (_formKey.currentState?.validate() ?? false) {
                             String result = await register(
-                                _emailController.text,
+                                _usernameController.text,
                                 _passwordController.text,
-                                _addressController.text);
-                            _emailController.clear();
+                                _emailController.text);
+                            _usernameController.clear();
                             _passwordController.clear();
-                            _addressController.clear();
+                            _emailController.clear();
                             showDialog(
                                 context: context,
                                 builder: (context) => AlertDialog(

@@ -61,13 +61,13 @@ class _UserListScreenState extends State<UserListScreen> {
               itemBuilder: (context, index) {
                 var user = users[index];
                 return ListTile(
-                  title: Text('ID: ${user.id}'),
+                  title: Text('ID: ${user.userId}'),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('First Name: ${user.fname}'),
-                      Text('Last Name: ${user.lname}'),
-                      Text('Address: ${user.address}'),
+                      Text('First Name: ${user.username}'),
+                      Text('Last Name: ${user.password}'),
+                      Text('Address: ${user.email}'),
                     ],
                   ),
                 );

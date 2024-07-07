@@ -34,7 +34,7 @@ class _AccountScreenState extends State<AccountScreen> {
       MySqlConnection connection = await Mysql().connection;
 
       var results = await connection
-          .query('select * from hallo.DEMO where id = ?', [userId]);
+          .query('select * from Production.users where user_id = ?', [userId]);
 
       if (results.isNotEmpty) {
         var userData = results.first.fields;
@@ -77,16 +77,16 @@ class _AccountScreenState extends State<AccountScreen> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      itemProfile('Name', user!.fname, CupertinoIcons.person),
+                      itemProfile(
+                          'Name', user!.username, CupertinoIcons.person),
                       const SizedBox(height: 10),
                       itemProfile(
-                          'Last Name', user!.lname, CupertinoIcons.phone),
+                          'Last Name', user!.password, CupertinoIcons.phone),
+                      const SizedBox(height: 10),
+                      itemProfile('Email', user!.email, CupertinoIcons.mail),
                       const SizedBox(height: 10),
                       itemProfile(
-                          'Address', user!.address, CupertinoIcons.location),
-                      const SizedBox(height: 10),
-                      itemProfile(
-                          'Email', '${user!.id}', CupertinoIcons.person),
+                          'User Id', '${user!.userId}', CupertinoIcons.person),
                       const SizedBox(
                         height: 20,
                       ),
