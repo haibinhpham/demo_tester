@@ -1,3 +1,4 @@
+import 'package:demo_tester/testing/model/item.dart';
 import 'package:demo_tester/testing/model/mysql.dart';
 import 'package:flutter/material.dart';
 import 'package:mysql1/mysql1.dart';
@@ -6,14 +7,16 @@ import 'package:provider/provider.dart';
 import '../../controller/provider/user_provider.dart';
 import '../widgets/loading_indicator.dart';
 
-class AddItemScreen extends StatefulWidget {
-  const AddItemScreen({super.key});
+class UpdateItemScreen extends StatefulWidget {
+  final Item item;
+  const UpdateItemScreen({super.key, required this.item});
 
   @override
-  State<AddItemScreen> createState() => _AddItemScreenState();
+  State<UpdateItemScreen> createState() => _UpdateItemScreenState();
 }
 
-class _AddItemScreenState extends State<AddItemScreen> {
+class _UpdateItemScreenState extends State<UpdateItemScreen> {
+  late Item item;
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _itemNameController = TextEditingController();
   final TextEditingController _itemDescriptionCtroller =
@@ -22,8 +25,19 @@ class _AddItemScreenState extends State<AddItemScreen> {
   final TextEditingController _itemQuantityController = TextEditingController();
   final TextEditingController _itemImageUrlController = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    item = widget.item;
+    _itemNameController.text = item.itemName;
+    _itemDescriptionCtroller.text = item.itemDescription;
+    _itemPricecontroller.text = item.price.toString();
+    _itemQuantityController.text = item.quantity.toString();
+    _itemImageUrlController.text = item.imageUrl;
+  }
+
   //todo add image functionality later
-  Future<String> addItem({
+  Future<String> updateItem({
     required String itemName,
     required String itemDescription,
     required int itemPrice,
@@ -39,26 +53,17 @@ class _AddItemScreenState extends State<AddItemScreen> {
       }
       //get conn
       MySqlConnection connection = await Mysql().connection;
-      //check if same item name already exists
-      var results = await connection.query(
-          'select count(*) as count from Production.items where item_name = ?',
-          [itemName]);
-      int count = results.first['count'];
-      if (count > 0) {
-        debugPrint('Order already exists');
-        return 'Order already exists';
-      }
 
-      //perform add operation
+      //perform update operation
       await connection.query(
-          'insert into Production.items(item_name, item_desc, amount, seller_id, price, image_url) values(?,?,?,?,?,?)',
-          [itemName, itemDescription, quantity, userId, itemPrice, imageUrl]);
+          "update Production.items set item_name = ?, item_desc = ?, amount = ?, price = ?, image_url = ? where Production.items.item_id = ?",
+          [itemName, itemDescription, quantity, itemPrice, imageUrl, item.itemId]);
       Navigator.of(context).pop();
-      return 'Item added!';
+      return 'Item Updated!';
     } catch (e) {
       debugPrint('Error adding item: $e');
       Navigator.of(context).pop();
-      return 'Error adding item';
+      return 'Error updating item';
     }
   }
 
@@ -73,7 +78,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
               TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
-                    if (message == 'Item added!') {
+                    if (message == 'Item Updated!') {
                       Navigator.of(context).pop();
                       Navigator.of(context).pop();
                     }
@@ -104,7 +109,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 int itemPrice = int.parse(_itemPricecontroller.text);
                 String imageUrl = _itemImageUrlController.text;
                 int itemQuantity = int.parse(_itemQuantityController.text);
-                String result = await addItem(
+                String result = await updateItem(
                   itemName: itemName,
                   itemDescription: itemDescription,
                   itemPrice: itemPrice,
@@ -126,7 +131,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Add Item',
+          'Update Item',
           style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -252,7 +257,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                       letterSpacing: 2,
                     ),
                   ),
-                  child: const Text('Add Item'),
+                  child: const Text('Update Item'),
                 )
               ],
             ),

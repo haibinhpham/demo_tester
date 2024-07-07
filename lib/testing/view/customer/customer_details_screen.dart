@@ -1,9 +1,12 @@
 import 'package:demo_tester/testing/controller/provider/customer_provider.dart';
 import 'package:demo_tester/testing/model/mysql.dart';
+import 'package:demo_tester/testing/view/customer/customer_update_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:provider/provider.dart';
+import '../../controller/provider/order_provider.dart';
 import '../../model/customer.dart';
+import '../order/order_details_screen.dart';
 
 class CustomerDetailScreen extends StatefulWidget {
   const CustomerDetailScreen({super.key});
@@ -14,6 +17,7 @@ class CustomerDetailScreen extends StatefulWidget {
 
 class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
   bool isLoading = true;
+  late Customer customer;
 
   @override
   void initState() {
@@ -42,8 +46,8 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       //get conn
       MySqlConnection connection = await Mysql().connection;
       //perform operation
-      var customerResult = await connection
-          .query('select * from hallo.customer where cust_id = ?', [custId]);
+      var customerResult = await connection.query(
+          'select * from Production.customers where customer_id = ?', [custId]);
 
       if (customerResult.isEmpty) {
         debugPrint('Customer not found');
@@ -51,9 +55,10 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       }
 
       //save info to provider
-      Customer customer = Customer.fromJson(customerResult.first.fields);
+      Customer customerJson = Customer.fromJson(customerResult.first.fields);
       Provider.of<CustomerProvider>(context, listen: false)
-          .setCustomerInfo(customer);
+          .setCustomerInfo(customerJson);
+      customer = customerJson;
     } catch (e) {
       debugPrint('Error fetching customer details: $e');
     }
@@ -71,12 +76,13 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       MySqlConnection connection = await Mysql().connection;
       //perform operations
       var orderResults = await connection.query(
-          'select hallo.lmao.*,hallo.customer.cust_name from hallo.lmao join hallo.customer on hallo.customer.cust_id = hallo.lmao.cust_id where hallo.lmao.cust_id = ?',
+          'select Production.orders.*, Production.customers.name from Production.orders join Production.customers on Production.customers.customer_id = Production.orders.customer_id where Production.orders.customer_id = ?',
           [custId]);
 
       //save to list of maps
       List<Map<String, dynamic>> orders =
           orderResults.map((row) => row.fields).toList();
+      print(orders.first);
 
       Provider.of<CustomerProvider>(context, listen: false)
           .setCustomerOrders(orders);
@@ -112,6 +118,16 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
           ),
         ),
         elevation: 0,
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+                return UpdateCustomerScreen(customer: customer);
+              })).then((_) => fetchCustomerData());
+            },
+            icon: const Icon(Icons.edit_rounded),
+          ),
+        ],
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -122,20 +138,20 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Card(
+                      Card.outlined(
                         margin: const EdgeInsets.symmetric(vertical: 8),
                         child: ListTile(
                           title: Text(
-                              'Customer ID: ${customerProvider.customerInfo!.custId}'),
+                              'Customer ID: ${customerProvider.customerInfo!.customerId}'),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                  'Name: ${customerProvider.customerInfo!.custName}'),
-                              // Text(
-                              //     'Email: ${customerProvider.customerInfo!.custEmail}'),
-                              // Text(
-                              //     'Phone: ${customerProvider.customerInfo!.custPhone}'),
+                                  'Name: ${customerProvider.customerInfo!.name}'),
+                              Text(
+                                  'address: ${customerProvider.customerInfo!.address}'),
+                              Text(
+                                  'Phone: ${customerProvider.customerInfo!.phone}'),
                             ],
                           ),
                         ),
@@ -145,14 +161,21 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                           style: TextStyle(
                               fontSize: 18, fontWeight: FontWeight.bold)),
                       ...customerProvider.customerOrders.map((order) {
-                        return Card(
+                        return Card.outlined(
                           margin: const EdgeInsets.symmetric(vertical: 8),
                           child: ListTile(
-                            title: Text('Order ID: ${order['lmao_id']}'),
+                            onTap: () {
+                              Provider.of<OrderProvider>(context, listen: false)
+                                  .setOrderId(order['order_id']);
+                              Navigator.push(context,
+                                  MaterialPageRoute(builder: (context) {
+                                return const OrderDetailScreen();
+                              })).then((value) => fetchCustomerData());
+                            },
+                            title: Text('Order ID: ${order['order_id']}'),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Order Number: ${order['order_number']}'),
                                 Text('Status: ${order['status']}'),
                               ],
                             ),

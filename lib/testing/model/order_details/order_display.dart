@@ -1,32 +1,37 @@
 import 'order_details.dart';
 
 class OrderDisplay {
-  final int lmaoId;
-  final int id;
-  final int custId;
-  final String orderNumber;
-  final String custName;
+  final int orderId;
+  final int sellerId;
+  final int customerId;
+  final String customerName;
+  final String orderDesc;
   final String status;
+  final int totalPrice;
   final List<OrderDetails> details;
 
   OrderDisplay(
-      {required this.lmaoId,
-      required this.id,
-      required this.custId,
-      required this.orderNumber,
-      required this.custName,
-      required this.status,
+    {
+    required this.orderId,
+    required this.sellerId,
+    required this.customerId,
+    required this.customerName,
+    required this.orderDesc,
+    required this.status,
+    required this.totalPrice,
       required this.details});
 
   factory OrderDisplay.fromJson(
       Map<String, dynamic> json, List<OrderDetails> details) {
+    print(json);
     return OrderDisplay(
-      lmaoId: json['lmao_id'],
-      id: json['id'],
-      custId: json['cust_id'],
-      orderNumber: json['order_number'],
-      custName: json['cust_name'],
+      orderId: json['order_id'],
+      sellerId: json['seller_id'],
+      customerId: json['customer_id'],
+      customerName: json['name'],
+      orderDesc: json['order_desc'],
       status: json['status'],
+      totalPrice: json['total_price'],
       details: details,
     );
   }

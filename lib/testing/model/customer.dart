@@ -1,15 +1,19 @@
 class Customer {
-  final int custId;
-  final String custName;
-  final int id;
+  final int customerId;
+  final int sellerId;
+  final String name;
+  final String phone;
+  final String address;
 
-  Customer({required this.custId, required this.custName, required this.id});
+  Customer({required this.customerId, required this.sellerId, required this.name, required this.phone, required this.address,});
 
   factory Customer.fromJson(Map<String, dynamic> json) {
     return Customer(
-      custId: json['cust_id'],
-      custName: json['cust_name'],
-      id: json['id'],
+      customerId: json['customer_id'],
+      sellerId: json['seller_id'],
+      name: json['name'],
+      phone: json['phone'],
+      address: json['address'],
     );
   }
 }

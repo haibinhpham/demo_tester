@@ -1,8 +1,11 @@
+import 'package:demo_tester/testing/view/widgets/loading_indicator.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:provider/provider.dart';
 
 import '../../controller/provider/user_provider.dart';
+import '../../model/item.dart';
 import '../../model/mysql.dart';
 
 class AddOrderScreen extends StatefulWidget {
@@ -15,6 +18,8 @@ class AddOrderScreen extends StatefulWidget {
 class _AddOrderScreenState extends State<AddOrderScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _orderNumberController = TextEditingController();
+
+  final f = NumberFormat("###,###.###", "id_ID");
 
   //
   List<String> customerNames = [];
@@ -84,14 +89,14 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
       MySqlConnection connection = await Mysql().connection;
       //perform operation
       var results = await connection.query(
-          'select hallo.customer.cust_id,hallo.customer.cust_name from hallo.customer where hallo.customer.id = ?',
+          'select Production.customers.customer_id, Production.customers.name from Production.customers where Production.customers.seller_id = ?',
           [userId]);
       //map to dropdown
       setState(() {
         //map id and names to list of maps
         customers = results
             .map((row) =>
-                {'cust_id': row['cust_id'], 'cust_name': row['cust_name']})
+                {'cust_id': row['customer_id'], 'cust_name': row['name']})
             .toList();
         //map names to dropdown
         customerNames =
@@ -118,14 +123,14 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
       MySqlConnection connection = await Mysql().connection;
       //perform operation
       var results = await connection.query(
-          'select hallo.item.item_name,hallo.item.quantity from hallo.item where hallo.item.id = ?',
+          'select Production.items.item_name, Production.items.amount from Production.items where Production.items.seller_id = ?',
           [userId]);
       //map to dropdown
       setState(() {
         items = results
             .map((row) => {
                   'item_name': row['item_name'],
-                  'quantity': row['quantity'],
+                  'quantity': row['amount'],
                 })
             .toList();
         isLoadingItems = false;
@@ -184,6 +189,7 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
   }
 
   Future<void> performAddOrder() async {
+    UtilWidget.showLoadingDialog(context: context);
     try {
       //get provider
       int? userId = Provider.of<UserProvider>(context, listen: false).userId;
@@ -200,10 +206,20 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
         var selectedCustomerData = customers.firstWhere(
             (customer) => customer['cust_name'] == selectedCustomer);
         int customerId = selectedCustomerData['cust_id'];
+
+        int totalPrice = 0;
+        for (var entry in selectedItems.entries) {
+          var itemResult = await txn.query(
+              'select Production.items.* from Production.items where Production.items.item_name = ? and Production.items.seller_id = ?',
+              [entry.key, userId]);
+          var item = Item.fromJson(itemResult.first.fields);
+          totalPrice += item.price * entry.value;
+        }
+
         //add entry into lmao table
         var lmaoResult = await txn.query(
-            'insert into hallo.lmao(id,order_number,cust_id,status) values (?,?,?,?)',
-            [userId, _orderNumberController.text, customerId, 'created']);
+            'insert into Production.orders(seller_id,customer_id,order_desc, status, total_price) values (?,?,?,?,?)',
+            [userId, customerId, '', 'created', totalPrice]);
 
         //get the new lmao_id
         int lmaoId = lmaoResult.insertId!;
@@ -211,7 +227,7 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
         //add entries into lmao details
         for (var entry in selectedItems.entries) {
           var itemResult = await txn.query(
-              'select hallo.item.item_id, hallo.item.quantity from hallo.item where hallo.item.item_name = ? and hallo.item.id = ?',
+              'select Production.items.* from Production.items where Production.items.item_name = ? and Production.items.seller_id = ?',
               [entry.key, userId]);
 
           if (itemResult.isEmpty) {
@@ -219,27 +235,38 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
             throw Exception('Item not found: ${entry.key}');
           }
 
-          int itemId = itemResult.first['item_id'];
-          int currentQuantity = itemResult.first['quantity'];
+          var item = Item.fromJson(itemResult.first.fields);
 
-          if (entry.value > currentQuantity) {
+          if (entry.value > item.quantity) {
             debugPrint('Not enough stock for item: ${entry.key}');
             throw Exception('Not enough stock for item: ${entry.key}');
           }
           //insert into lmao details
           await txn.query(
-              'insert into hallo.lmao_details(id,lmao_id,item_id,lmao_quantity) values (?,?,?,?)',
-              [userId, lmaoId, itemId, entry.value]);
+              'insert into Production.orderItems(order_id, item_id, item_name, item_desc, item_price, seller_id, amount) values (?,?,?,?,?,?,?)',
+              [
+                lmaoId,
+                item.itemId,
+                item.itemName,
+                item.itemDescription,
+                item.price,
+                userId,
+                entry.value
+              ]);
 
           //update item quantity
           await txn.query(
-              'update hallo.item set quantity = quantity - ? where hallo.item.item_id = ?',
-              [entry.value, itemId]);
+              'update Production.items set amount = amount - ? where Production.items.item_id = ?',
+              [entry.value, item.itemId]);
         }
+        Navigator.of(context).pop();
+        Navigator.of(context).pop();
         debugPrint('Order added successfully');
         clearFormFields();
       });
     } catch (e) {
+      Navigator.of(context).pop();
+      Navigator.of(context).pop();
       debugPrint('Error performing query $e');
     }
   }
@@ -281,25 +308,10 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
               key: _formKey,
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 24.0, vertical: 16.0),
+                    horizontal: 12.0, vertical: 16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(
-                      'Add New Order',
-                      style: Theme.of(context).textTheme.bodySmall,
-                      textAlign: TextAlign.center,
-                    ),
-                    _gap(),
-                    TextFormField(
-                      controller: _orderNumberController,
-                      decoration: const InputDecoration(
-                        labelText: 'Order Number',
-                        hintText: 'Enter order number',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    _gap(),
                     DropdownButton<String>(
                         isExpanded: true,
                         value: selectedCustomer,
@@ -350,13 +362,16 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
                         : Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: selectedItems.entries.map((entry) {
-                              return Card(
-                                color: Colors.white,
+                              return Card.outlined(
                                 child: ListTile(
-                                  title: Text(entry.key),
-                                  subtitle: Text("Qty: ${entry.value}"),
-                                  trailing: IconButton(onPressed: ()=> setState(()=>selectedItems.remove(entry.key)), icon: Icon(Icons.delete_rounded))
-                                ),
+                                    title: Text(entry.key),
+                                    subtitle:
+                                        Text("Qty: ${f.format(entry.value)}"),
+                                    trailing: IconButton(
+                                        onPressed: () => setState(() =>
+                                            selectedItems.remove(entry.key)),
+                                        icon:
+                                            const Icon(Icons.delete_rounded))),
                               );
                             }).toList(),
                           ),
@@ -370,9 +385,7 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
                           ),
                         ),
                         onPressed: () async {
-                          if(_formKey.currentState!.validate()){
-
-                          }
+                          if (_formKey.currentState!.validate()) {}
                           await performAddOrder();
                         },
                         child: const Padding(
