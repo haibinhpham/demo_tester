@@ -3,13 +3,14 @@ class User {
   final String username;
   final String password;
   final String email;
+  final String createdAt;
 
-  User({
-    required this.userId,
-    required this.username,
-    required this.password,
-    required this.email,
-  });
+  User(
+      {required this.userId,
+      required this.username,
+      required this.password,
+      required this.email,
+      required this.createdAt});
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
@@ -17,6 +18,7 @@ class User {
       username: json['username'],
       password: json['password'],
       email: json['email'],
+      createdAt: json['created_at'],
     );
   }
 }
