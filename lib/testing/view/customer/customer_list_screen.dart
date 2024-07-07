@@ -3,12 +3,12 @@ import 'package:demo_tester/testing/controller/provider/user_provider.dart';
 import 'package:demo_tester/testing/model/mysql.dart';
 import 'package:demo_tester/testing/view/customer/add_customer_screen.dart';
 import 'package:demo_tester/testing/view/customer/customer_details_screen.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:provider/provider.dart';
 
 import '../../model/customer.dart';
+import '../widgets/loading_indicator.dart';
 
 class CustomerListScreen extends StatefulWidget {
   const CustomerListScreen({super.key});
@@ -19,8 +19,10 @@ class CustomerListScreen extends StatefulWidget {
 
 class _CustomerListScreenState extends State<CustomerListScreen> {
   List<Customer> customers = [];
+  List<Customer> filteredCustomers = [];
   int count = 0;
   bool isLoading = true;
+  bool isSearching = false;
 
   @override
   void initState() {
@@ -28,7 +30,26 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
     fetchAllCustomers();
   }
 
+  void searchOperation(String val) {
+    if (val.isEmpty) {
+      setState(() {
+        isSearching = false;
+      });
+    } else {
+      setState(() {
+        isSearching = true;
+        filteredCustomers = customers
+            .where((element) =>
+                element.name.toLowerCase().startsWith(val.toLowerCase()))
+            .toList();
+      });
+    }
+  }
+
   void fetchAllCustomers() async {
+    setState(() {
+      isLoading = true;
+    });
     try {
       //get provider
       int? userId = Provider.of<UserProvider>(context, listen: false).userId;
@@ -41,7 +62,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
       }
       MySqlConnection connection = await Mysql().connection;
       var results = await connection.query(
-          'select hallo.customer.* from hallo.customer natural join hallo.DEMO where hallo.DEMO.id = ?',
+          'select Production.customers.* from Production.customers natural join Production.users where Production.users.user_id = ? and is_deleted = false',
           [userId]);
 
       debugPrint('Query executed, number of results: ${results.length}');
@@ -64,23 +85,21 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
   }
 
   Future<String> deleteCustomer(int customerId) async {
+    UtilWidget.showLoadingDialog(context: context);
     try {
-      //get provider
-      int? userId = Provider.of<UserProvider>(context, listen: false).userId;
-      if (userId == null) {
-        return 'User id is null';
-      }
       //get connection
       MySqlConnection connection = await Mysql().connection;
       //delete operation
       await connection.query(
-          'delete from hallo.customer where hallo.customer.id = ? and hallo.customer.cust_id = ?',
-          [userId, customerId]);
+          'update Production.customers set is_deleted = true where Production.customers.customer_id = ?',
+          [customerId]);
       //reload after query
       fetchAllCustomers();
+      Navigator.of(context).pop();
       return 'Delete Successful';
     } catch (e) {
       debugPrint('Error deleting item: $e');
+      Navigator.of(context).pop();
       return 'Delete Error';
     }
   }
@@ -150,101 +169,90 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
               ])),
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.lightBlue,
+        onPressed: () => {
+          Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+            return const AddCustomerScreen();
+          })).then((value) => fetchAllCustomers())
+        },
+        child: const Icon(Icons.add_rounded, color: Colors.white),
+      ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 10.0),
               scrollDirection: Axis.vertical,
               physics: const BouncingScrollPhysics(),
               child: Column(
                 children: [
-                  Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Colors.blue, Colors.white],
-                      ),
-                    ),
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        IconButton(
-                            onPressed: () {
-                              debugPrint('Filter btn pressed');
-                            },
-                            icon: const Icon(CupertinoIcons.layers_alt)),
-                        GestureDetector(
-                          child: IconButton(
-                              onPressed: () {
-                                debugPrint('Add btn pressed');
-                                Navigator.push(context,
-                                    MaterialPageRoute(builder: (context) {
-                                  return const AddCustomerScreen();
-                                }));
-                              },
-                              icon: const Icon(CupertinoIcons.add)),
-                        ),
-                      ],
+                  TextField(
+                    onChanged: (val) => {searchOperation(val)},
+                    decoration: const InputDecoration(
+                      labelText: 'Customer Name',
+                      hintText: 'Enter Customer name',
+                      prefixIcon: Icon(Icons.search_rounded),
+                      border: OutlineInputBorder(),
                     ),
                   ),
-                  _gap(),
                   ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: customers.length,
+                    itemCount: !isSearching ? customers.length :filteredCustomers.length,
                     itemBuilder: (context, index) {
-                      var customer = customers[index];
-                      return Card(
-                        elevation: 5,
+                      var customer = !isSearching ?customers[index] : filteredCustomers[index];
+                      return Card.outlined(
+                        margin: const EdgeInsets.symmetric(vertical: 8.0),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(18.0),
                           child: ListTile(
-                            leading: const Icon(
-                              Icons.person,
-                              size: 30,
-                              color: Colors.black,
-                            ),
-                            title: Text(
-                              'Name: ${customer.custName}',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blue,
+                            leading: const CircleAvatar(
+                              backgroundColor: Colors.lightBlue,
+                              child: Icon(
+                                Icons.person,
+                                size: 30,
+                                color: Colors.white,
                               ),
                             ),
-                            subtitle: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Id: ${customer.custId}',
-                                    style: const TextStyle(fontSize: 16),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  customer.name,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.lightBlue,
                                   ),
-                                  _gap(),
-                                  //todo add from db
-                                  const Text(
-                                    'Phone: 1111111',
-                                    style: TextStyle(fontSize: 16),
+                                ),
+                                Text(
+                                  '+49 ${customer.phone}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.black54,
                                   ),
-                                  _gap(),
-                                  //todo add from db
-                                  const Text(
-                                    'Address: 11 Yilong Str. Shenzhen',
-                                    style: TextStyle(fontSize: 13),
+                                ),
+                                Text(
+                                  'Address: ${customer.address}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: Colors.black54,
+                                    fontSize: 13,
                                   ),
-                                  _gap(),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                            trailing: GestureDetector(
+                            trailing: InkWell(
                               child: const Icon(
                                 Icons.delete,
                                 color: Colors.grey,
                               ),
                               onTap: () {
-                                _showConfirmationDialog(customer.custId);
+                                _showConfirmationDialog(customer.customerId);
                                 debugPrint('Delete icon pressed');
                               },
                             ),
@@ -253,11 +261,12 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                               //save to provider
                               Provider.of<CustomerProvider>(context,
                                       listen: false)
-                                  .setCustomerId(customer.custId);
-                              Navigator.push(context,
-                                  MaterialPageRoute(builder: (context) {
-                                return const CustomerDetailScreen();
-                              }));
+                                  .setCustomerId(customer.customerId);
+                              Navigator.push(context, MaterialPageRoute(
+                                builder: (context) {
+                                  return const CustomerDetailScreen();
+                                },
+                              )).then((value) => fetchAllCustomers());
                             },
                           ),
                         ),
@@ -269,6 +278,4 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
             ),
     );
   }
-
-  Widget _gap() => const SizedBox(height: 16);
 }

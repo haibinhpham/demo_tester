@@ -2,6 +2,7 @@ import 'package:demo_tester/testing/controller/provider/order_provider.dart';
 import 'package:demo_tester/testing/model/mysql.dart';
 import 'package:demo_tester/testing/model/order_details/order_details.dart';
 import 'package:demo_tester/testing/model/order_details/order_display.dart';
+import 'package:demo_tester/testing/view/widgets/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:provider/provider.dart';
@@ -25,6 +26,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   }
 
   Future<void> fetchOrderDetails() async {
+    setState(() {
+      isLoading = true;
+    });
     try {
       int? orderId = Provider.of<OrderProvider>(context, listen: false).orderId;
       if (orderId == null) {
@@ -37,7 +41,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       MySqlConnection connection = await Mysql().connection;
       //fetch order details
       var orderResults = await connection.query(
-          'select hallo.lmao.*, hallo.customer.cust_name from hallo.lmao join hallo.customer on hallo.customer.cust_id = hallo.lmao.cust_id where hallo.lmao.lmao_id = ?',
+          'select Production.orders.*, Production.customers.name from Production.orders join Production.customers on Production.customers.customer_id = Production.customers.customer_id where Production.orders.order_id = ?',
           [orderId]);
 
       if (orderResults.isEmpty) {
@@ -51,7 +55,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       var orderRow = orderResults.first;
       //fetch lmao details row
       var detailsResults = await connection.query(
-          'select hallo.lmao_details.*,hallo.item.item_name from hallo.lmao_details join hallo.item on hallo.lmao_details.item_id = hallo.item.item_id where lmao_id = ?',
+          'select Production.orderItems.* from Production.orderItems where Production.orderItems.order_id = ?',
           [orderId]);
       //map to lists
       List<OrderDetails> orderDetails = detailsResults.map((row) {
@@ -62,8 +66,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         orderDisplay = OrderDisplay.fromJson(orderRow.fields, orderDetails);
         isLoading = false;
       });
-    } catch (e) {
-      debugPrint('Error fetching order details: $e');
+    } catch (e, t) {
+      debugPrint('Error fetching order details: $e $t');
       setState(() {
         isLoading = false;
       });
@@ -71,6 +75,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   }
 
   Future<void> updateOrderStatus() async {
+    UtilWidget.showLoadingDialog(context: context);
     try {
       int? orderId = Provider.of<OrderProvider>(context, listen: false).orderId;
       if (orderId == null) {
@@ -83,8 +88,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           'update hallo.lmao set hallo.lmao.status = ? where hallo.lmao.lmao_id = ?',
           [selectedStatus, orderId]);
       //refresh page
+      Navigator.of(context).pop();
       fetchOrderDetails();
     } catch (e) {
+      Navigator.of(context).pop();
       debugPrint('Error updating order status: $e');
     }
   }
@@ -125,19 +132,17 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Card(
+                        Card.outlined(
                           margin: const EdgeInsets.symmetric(vertical: 8),
                           child: ListTile(
-                            title: Text('Order ID: ${orderDisplay!.lmaoId}'),
+                            title: Text('Order ID: ${orderDisplay!.orderId}'),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Vendor ID: ${orderDisplay!.id}'),
-                                Text('Customer ID: ${orderDisplay!.custId}'),
                                 Text(
-                                    'Order desc: ${orderDisplay!.orderNumber}'),
+                                    'Customer ID: ${orderDisplay!.customerId}'),
                                 Text(
-                                    'Customer name: ${orderDisplay!.custName}'),
+                                    'Customer name: ${orderDisplay!.customerName}'),
                                 Text('Status: ${orderDisplay!.status}'),
                               ],
                             ),
@@ -146,15 +151,14 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         _gap(),
                         const Text('Order Items:'),
                         ...orderDisplay!.details.map((detail) {
-                          return Card(
-                            elevation: 2,
+                          return Card.outlined(
                             child: ListTile(
                               title: Text('Item id: ${detail.itemId}'),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text('Item Name: ${detail.itemName}'),
-                                  Text('Quantity: ${detail.lmaoQuantity}'),
+                                  Text('Quantity: ${detail.amount}'),
                                 ],
                               ),
                             ),

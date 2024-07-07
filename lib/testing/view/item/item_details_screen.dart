@@ -1,6 +1,6 @@
-import 'package:demo_tester/testing/view/item/item_list_screen.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:demo_tester/testing/view/item/item_update_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:provider/provider.dart';
 import '../../controller/provider/user_provider.dart';
@@ -9,7 +9,6 @@ import '../../model/mysql.dart';
 
 class ItemDetailScreen extends StatefulWidget {
   const ItemDetailScreen({super.key, required this.item});
-
   final Item item;
 
   @override
@@ -18,16 +17,19 @@ class ItemDetailScreen extends StatefulWidget {
 
 class _ItemDetailScreenState extends State<ItemDetailScreen> {
   late Item item;
-  bool isLoading = true;
+  bool isLoading = false;
+  final f = NumberFormat("###,###.###", "id_ID");
 
   @override
   void initState() {
     super.initState();
     item = widget.item;
-    fetchItemDetails();
   }
 
   Future<void> fetchItemDetails() async {
+    setState(() {
+      isLoading = true;
+    });
     try {
       //get provider
       int? userId = Provider.of<UserProvider>(context, listen: false).userId;
@@ -38,8 +40,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       //get connection
       MySqlConnection connection = await Mysql().connection;
       var results = await connection.query(
-          'select * from hallo.item where id = ? and item_id = ?',
-          [userId, widget.item.itemId]);
+          'select * from Production.items where Production.items.item_id = ?',
+          [item.itemId]);
 
       if (results.isNotEmpty) {
         var userData = results.first.fields;
@@ -60,60 +62,40 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     }
   }
 
-  Future<void> updateItemQuantity(int quantity) async {
-    try {
-      //get provider
-      int? userId = Provider.of<UserProvider>(context, listen: false).userId;
-      //get connection
-      MySqlConnection connection = await Mysql().connection;
-      //update operation
-      await connection.query(
-          'update hallo.item set hallo.item.quantity = ? where hallo.item.id = ? and hallo.item.item_id = ?',
-          [quantity, userId, widget.item.itemId]);
-
-      //reload the page
-      fetchItemDetails();
-      debugPrint('Quantity updated');
-    } catch (e) {
-      debugPrint('Error updating quantity: $e');
-    }
-  }
-
-  Future<void> updateItemName(String value) async {
-    try {
-      //get provider
-      int? userId = Provider.of<UserProvider>(context, listen: false).userId;
-      //get conn
-      MySqlConnection connection = await Mysql().connection;
-      //update operation
-      await connection.query(
-          'update hallo.item set hallo.item.item_name = ? where hallo.item.id = ? and hallo.item.item_id = ?',
-          [value, userId, widget.item.itemId]);
-      //reload the page
-      fetchItemDetails();
-    } catch (e) {
-      debugPrint('Error updating name: $e');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.deepPurple,
-                Colors.blue,
-              ],
+          title: const Text(
+            'Item Details',
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                letterSpacing: 2),
+          ),
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.deepPurple,
+                  Colors.blue,
+                ],
+              ),
             ),
           ),
-        ),
-        elevation: 0, // Removes the shadow under the AppBar
-      ),
+          elevation: 0, // Removes the shadow under the AppBar
+          actions: [
+            IconButton(
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+                  return UpdateItemScreen(item: item);
+                })).then((_) => fetchItemDetails());
+              },
+              icon: const Icon(Icons.edit_rounded),
+            ),
+          ]),
       body: isLoading
           ? const Center(
               child: CircularProgressIndicator(),
@@ -123,23 +105,26 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Center(
-                    child: ClipRRect(
+                  Container(
+                    width: 400,
+                    height: 400,
+                    decoration: BoxDecoration(
+                      color: Colors.lightBlue,
                       borderRadius: BorderRadius.circular(20.0),
-                      child: Container(
-                        width: 400,
-                        height: 400,
-                        color: Colors.cyan,
-                        child: const Center(
-                            child: Icon(CupertinoIcons.square_grid_2x2_fill)),
-                      ),
+                      image: DecorationImage(
+                          image: NetworkImage(item.imageUrl.isNotEmpty
+                              ? item.imageUrl
+                              : "https://upload.wikimedia.org/wikipedia/commons/a/af/Question_mark.png"),
+                          fit: BoxFit.cover),
                     ),
                   ),
                   const SizedBox(height: 40),
                   Text(
                     item.itemName,
                     style: const TextStyle(
-                        fontSize: 24, fontWeight: FontWeight.bold),
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -148,97 +133,23 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Quantity: ${item.quantity}',
+                    'Description: ${item.itemDescription}',
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Price: ${f.format(item.price)}',
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Quantity: ${f.format(item.quantity)}',
                     style: const TextStyle(fontSize: 18),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Description:',
-                    style: TextStyle(fontSize: 18),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'A short description of this product blahblahblahablaalasdlfajdajsdfja',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  const Spacer(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          // Handle update quantity
-                          _showUpdateDialog('Quantity');
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 12),
-                        ),
-                        child: const Text('UPDATE QUANTITY'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          // Handle update name
-                          _showUpdateDialog('Name');
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 12),
-                        ),
-                        child: const Text('UPDATE NAME'),
-                      ),
-                    ],
-                  ),
                 ],
               ),
             ),
     );
-  }
-
-  void _showUpdateDialog(String field) {
-    final TextEditingController controller = TextEditingController();
-
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Update $field'),
-            content: SingleChildScrollView(
-              child: TextField(
-                controller: controller,
-                decoration: InputDecoration(hintText: 'Enter new $field'),
-                keyboardType: field == 'Quantity'
-                    ? TextInputType.number
-                    : TextInputType.text,
-              ),
-            ),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('CANCEL')),
-              TextButton(
-                onPressed: () {
-                  if (field == 'Quantity') {
-                    if (int.tryParse(controller.text) == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('Please enter a valid number')));
-                    } else {
-                      debugPrint('Update $field');
-                      updateItemQuantity(int.parse(controller.text));
-                      //perform update login
-                      Navigator.of(context).pop();
-                    }
-                  } else {
-                    debugPrint('Update $field');
-                    Navigator.of(context).pop();
-                  }
-                },
-                child: const Text('UPDATE'),
-              )
-            ],
-          );
-        });
   }
 }

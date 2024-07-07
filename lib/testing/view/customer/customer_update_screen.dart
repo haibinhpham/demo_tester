@@ -1,4 +1,5 @@
 import 'package:demo_tester/testing/controller/provider/user_provider.dart';
+import 'package:demo_tester/testing/model/customer.dart';
 import 'package:demo_tester/testing/model/mysql.dart';
 import 'package:demo_tester/testing/view/widgets/loading_indicator.dart';
 import 'package:flutter/cupertino.dart';
@@ -6,14 +7,16 @@ import 'package:flutter/material.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:provider/provider.dart';
 
-class AddCustomerScreen extends StatefulWidget {
-  const AddCustomerScreen({super.key});
+class UpdateCustomerScreen extends StatefulWidget {
+  final Customer customer;
+  const UpdateCustomerScreen({super.key, required this.customer});
 
   @override
-  State<AddCustomerScreen> createState() => _AddCustomerScreenState();
+  State<UpdateCustomerScreen> createState() => _UpdateCustomerScreenState();
 }
 
-class _AddCustomerScreenState extends State<AddCustomerScreen> {
+class _UpdateCustomerScreenState extends State<UpdateCustomerScreen> {
+  late Customer customer;
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _customerNameController = TextEditingController();
   final TextEditingController _customerAddressController =
@@ -22,7 +25,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
       TextEditingController();
 
   //todo add address and phone later in db
-  Future<String> addCustomer() async {
+  Future<String> updateCustomer() async {
     UtilWidget.showLoadingDialog(context: context);
     try {
       //get provider
@@ -36,19 +39,19 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
 
       //perform add operation
       await connection.query(
-          'insert into Production.customers(seller_id, name, address, phone) values (?,?,?,?)',
+          'update Production.customers set name = ?, address = ?, phone = ? where Production.customers.customer_id = ?',
           [
-            userId,
             _customerNameController.text,
             _customerAddressController.text,
-            _customerPhoneController.text
+            _customerPhoneController.text,
+            customer.customerId,
           ]);
       Navigator.of(context).pop();
-      return 'Customer added!';
+      return 'Customer updated!';
     } catch (e) {
-      debugPrint('Error adding customer: $e');
+      debugPrint('Error updating customer: $e');
       Navigator.of(context).pop();
-      return 'Error adding customer';
+      return 'Error updating customer';
     }
   }
 
@@ -89,7 +92,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                 child: const Text('Cancel')),
             TextButton(
                 onPressed: () async {
-                  String result = await addCustomer();
+                  String result = await updateCustomer();
                   _showResultDialog(result);
                 },
                 child: const Text('Confirm'))
@@ -100,11 +103,20 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    customer = widget.customer;
+    _customerNameController.text = customer.name;
+    _customerAddressController.text = customer.address;
+    _customerPhoneController.text = customer.phone;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Add Customer',
+          'Update Customer',
           style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -197,7 +209,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                         letterSpacing: 2,
                       ),
                     ),
-                    child: const Text('Add Customer'))
+                    child: const Text('Update Customer'))
               ],
             ),
           ),

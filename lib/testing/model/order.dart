@@ -1,28 +1,31 @@
 class Order {
-  final int lmaoId;
-  final int id;
-  final int custId;
-  final String orderNumber;
-  final String custName;
+  final int orderId;
+  final int sellerId;
+  final int customerId;
+  final String customerName;
+  final String orderDesc;
   final String status;
+  final int totalPrice;
 
   Order({
-    required this.lmaoId,
-    required this.id,
-    required this.custId,
-    required this.orderNumber,
-    required this.custName,
+    required this.orderId,
+    required this.sellerId,
+    required this.customerId,
+    required this.customerName,
+    required this.orderDesc,
     required this.status,
+    required this.totalPrice,
   });
 
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(
-      lmaoId: json['lmao_id'],
-      id: json['id'],
-      custId: json['cust_id'],
-      orderNumber: json['order_number'],
-      custName: json['cust_name'],
+      orderId: json['order_id'],
+      sellerId: json['seller_id'],
+      customerId: json['customer_id'],
+      customerName: json['name'],
+      orderDesc: json['order_desc'],
       status: json['status'],
+      totalPrice: json['total_price'],
     );
   }
 }
