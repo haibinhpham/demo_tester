@@ -27,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
       MySqlConnection connection = await Mysql().connection;
 
       var results = await connection
-          .query('select * from hallo.DEMO where id = ?', [userId]);
+          .query('select * from Production.users where user_id = ?', [userId]);
 
       if (results.isNotEmpty) {
         var userData = results.first.fields;
