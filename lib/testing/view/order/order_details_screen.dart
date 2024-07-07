@@ -1,4 +1,5 @@
 import 'package:demo_tester/testing/controller/provider/order_provider.dart';
+import 'package:demo_tester/testing/controller/provider/user_provider.dart';
 import 'package:demo_tester/testing/model/mysql.dart';
 import 'package:demo_tester/testing/model/order_details/order_details.dart';
 import 'package:demo_tester/testing/model/order_details/order_display.dart';
@@ -38,11 +39,18 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         });
         return;
       }
+      int? userId = Provider.of<UserProvider>(context, listen: false).userId;
+      if (userId == null) {
+        setState(() {
+          isLoading = false;
+        });
+        return;
+      }
       MySqlConnection connection = await Mysql().connection;
       //fetch order details
       var orderResults = await connection.query(
-          'select Production.orders.*, Production.customers.name from Production.orders join Production.customers on Production.customers.customer_id = Production.customers.customer_id where Production.orders.order_id = ?',
-          [orderId]);
+          'select Production.orders.*, Production.customers.name from Production.orders natural join Production.customers  where Production.orders.order_id = ? and Production.orders.seller_id = ?',
+          [orderId, userId]);
 
       if (orderResults.isEmpty) {
         debugPrint('Order not found');

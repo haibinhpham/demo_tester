@@ -27,6 +27,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
   }
 
   Future<void> fetchCustomerData() async {
+    Provider.of<CustomerProvider>(context, listen: false).setCustomerOrders([]);
     await fetchCustomerDetails();
     await fetchCustomerOrders();
 
@@ -74,8 +75,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
         return;
       }
 
-      int? userId =
-          Provider.of<UserProvider>(context,listen:false).userId;
+      int? userId = Provider.of<UserProvider>(context, listen: false).userId;
       if (userId == null) {
         debugPrint('user id is null');
         return;
@@ -84,7 +84,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       MySqlConnection connection = await Mysql().connection;
       //perform operations
       var orderResults = await connection.query(
-          'select Production.orders.*, Production.customers.name from Production.orders join Production.customers on Production.customers.customer_id = Production.orders.customer_id where Production.orders.customer_id = ? and Production.orders.seller_id = ?',
+          'select Production.orders.*, Production.customers.name from Production.orders natural join Production.customers where Production.orders.customer_id = ? and Production.orders.seller_id = ?',
           [custId, userId]);
 
       //save to list of maps
