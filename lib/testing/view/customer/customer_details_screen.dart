@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:provider/provider.dart';
 import '../../controller/provider/order_provider.dart';
+import '../../controller/provider/user_provider.dart';
 import '../../model/customer.dart';
 import '../order/order_details_screen.dart';
 
@@ -73,11 +74,18 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
         return;
       }
 
+      int? userId =
+          Provider.of<UserProvider>(context,listen:false).userId;
+      if (userId == null) {
+        debugPrint('user id is null');
+        return;
+      }
+
       MySqlConnection connection = await Mysql().connection;
       //perform operations
       var orderResults = await connection.query(
-          'select Production.orders.*, Production.customers.name from Production.orders join Production.customers on Production.customers.customer_id = Production.orders.customer_id where Production.orders.customer_id = ?',
-          [custId]);
+          'select Production.orders.*, Production.customers.name from Production.orders join Production.customers on Production.customers.customer_id = Production.orders.customer_id where Production.orders.customer_id = ? and Production.orders.seller_id = ?',
+          [custId, userId]);
 
       //save to list of maps
       List<Map<String, dynamic>> orders =
