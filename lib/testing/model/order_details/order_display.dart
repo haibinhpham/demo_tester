@@ -23,6 +23,7 @@ class OrderDisplay {
 
   factory OrderDisplay.fromJson(
       Map<String, dynamic> json, List<OrderDetails> details) {
+    print(json);
     return OrderDisplay(
       orderId: json['order_id'],
       sellerId: json['seller_id'],

@@ -85,7 +85,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       MySqlConnection connection = await Mysql().connection;
       //update operation
       await connection.query(
-          'update hallo.lmao set hallo.lmao.status = ? where hallo.lmao.lmao_id = ?',
+          'update Production.orders set Production.orders.status = ? where Production.orders.order_id = ?',
           [selectedStatus, orderId]);
       //refresh page
       Navigator.of(context).pop();
