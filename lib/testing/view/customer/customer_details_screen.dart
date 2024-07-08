@@ -160,7 +160,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                               Text(
                                   'Name: ${customerProvider.customerInfo!.name}'),
                               Text(
-                                  'address: ${customerProvider.customerInfo!.address}'),
+                                  'Address: ${customerProvider.customerInfo!.address}'),
                               Text(
                                   'Phone: ${customerProvider.customerInfo!.phone}'),
                             ],
@@ -187,7 +187,8 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Status: ${order['status']}'),
+                                Text('Status: ${order['status']}',
+                                  style: const TextStyle(fontWeight: FontWeight.bold)),
                               ],
                             ),
                           ),

@@ -213,7 +213,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
                         Text('Total: ${f.format(order.totalPrice)}',
                             style: const TextStyle(color: Colors.black54)),
                         Text('Order status: ${order.status}',
-                            style: const TextStyle(color: Colors.black54)),
+                            style: const TextStyle(color: Colors.black54,fontWeight: FontWeight.bold)),
                       ],
                     ),
                     trailing: GestureDetector(
