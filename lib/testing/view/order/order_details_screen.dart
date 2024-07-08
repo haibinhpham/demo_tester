@@ -106,6 +106,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    bool isStatusChangeDisabled = orderDisplay?.status == 'cancelled' ||
+        orderDisplay?.status == 'delivered';
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -185,17 +187,21 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                             return DropdownMenuItem<String>(
                                 value: value, child: Text(value));
                           }).toList(),
-                          onChanged: (newValue) {
-                            setState(
-                              () {
-                                selectedStatus = newValue!;
-                              },
-                            );
-                          },
+                          onChanged: isStatusChangeDisabled
+                              ? null
+                              : (newValue) {
+                                  setState(
+                                    () {
+                                      selectedStatus = newValue!;
+                                    },
+                                  );
+                                },
                         ),
                         _gap(),
                         ElevatedButton(
-                            onPressed: updateOrderStatus,
+                            onPressed: isStatusChangeDisabled
+                                ? null
+                                : updateOrderStatus,
                             child: const Text('Update Status')),
                       ]),
                 ),

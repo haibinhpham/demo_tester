@@ -28,6 +28,49 @@ class _OrderListScreenState extends State<OrderListScreen> {
     fetchAllOrders();
   }
 
+  void showConfirmationDialog(BuildContext context, int orderId) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Confirm Cancellation'),
+            content: const Text('Are you sure?'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('No'),
+              ),
+              TextButton(
+                  onPressed: () async {
+                    Navigator.of(context).pop();
+                    await cancelOrder(orderId);
+                  },
+                  child: const Text('Yes'))
+            ],
+          );
+        });
+  }
+
+  void showResultDialog(BuildContext context, String message) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Result'),
+            content: Text(message),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Ok'))
+            ],
+          );
+        });
+  }
+
   Future<void> fetchAllOrders() async {
     setState(() {
       isLoading = true;
@@ -61,6 +104,50 @@ class _OrderListScreenState extends State<OrderListScreen> {
       setState(() {
         isLoading = false;
       });
+    }
+  }
+
+  Future<void> cancelOrder(int orderId) async {
+    try {
+      //get provider
+      int? userId = Provider.of<UserProvider>(context, listen: false).userId;
+
+      //get conn
+      MySqlConnection connection = await Mysql().connection;
+
+      //start transaction
+      await connection.transaction((txn) async {
+        var statusResult = await txn.query(
+            'select Production.orders.status from Production.orders where order_id = ? and seller_id = ?',
+            [orderId, userId]);
+
+        //if status is equal to created
+        if (statusResult.isNotEmpty) {
+          var status = statusResult.first['status'];
+          //start changing the query
+          if (status == 'created') {
+            //update order status to cancelled
+            await txn.query(
+                'update Production.orders set status = ? where order_id = ? and seller_id = ?',
+                ['cancelled', orderId, userId]);
+
+            //return items to inventory
+            var inventoryResults = await txn.query('');
+            showResultDialog(context, 'Cancelled successfully');
+          } else {
+            debugPrint('Order cannot be cancelled bc status is not created');
+            showResultDialog(
+                context, 'Cannot cancel because of status is not created');
+            throw Exception(
+                'Order cannot be cancelled bc status is not created');
+          }
+        }
+      });
+      //refresh the list
+      fetchAllOrders();
+    } catch (e) {
+      debugPrint('Error cancelling order: $e');
+      showResultDialog(context, 'Error: $e');
     }
   }
 
@@ -131,10 +218,11 @@ class _OrderListScreenState extends State<OrderListScreen> {
                     ),
                     trailing: GestureDetector(
                       child: IconButton(
-                          onPressed: () {
-                            debugPrint('Delete btn presssed');
+                          onPressed: () async {
+                            showConfirmationDialog(context, order.orderId);
+                            debugPrint('Cancel btn pressed');
                           },
-                          icon: const Icon(Icons.delete_rounded)),
+                          icon: const Icon(Icons.cancel_rounded)),
                     ),
                     onTap: () {
                       debugPrint('List tile pressed');
