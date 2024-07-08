@@ -131,8 +131,8 @@ class _OrderListScreenState extends State<OrderListScreen> {
                 'update Production.orders set status = ? where order_id = ? and seller_id = ?',
                 ['cancelled', orderId, userId]);
 
-            //return items to inventory
-            var inventoryResults = await txn.query('');
+            // //return items to inventory
+            // var inventoryResults = await txn.query('');
             showResultDialog(context, 'Cancelled successfully');
           } else {
             debugPrint('Order cannot be cancelled bc status is not created');
