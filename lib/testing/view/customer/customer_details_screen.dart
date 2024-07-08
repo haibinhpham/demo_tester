@@ -27,8 +27,6 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
   }
 
   Future<void> fetchCustomerData() async {
-    //clear states
-    Provider.of<CustomerProvider>(context, listen: false).setCustomerOrders([]);
     await fetchCustomerDetails();
     await fetchCustomerOrders();
 
@@ -46,11 +44,13 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
         debugPrint('customer id is null');
         return;
       }
+      int? userId = Provider.of<UserProvider>(context, listen: false).userId;
       //get conn
       MySqlConnection connection = await Mysql().connection;
       //perform operation
       var customerResult = await connection.query(
-          'select * from Production.customers where customer_id = ?', [custId]);
+          'select * from Production.customers where customer_id = ? and seller_id = ?',
+          [custId, userId]);
 
       if (customerResult.isEmpty) {
         debugPrint('Customer not found');

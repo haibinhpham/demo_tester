@@ -26,6 +26,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
 
   @override
   void initState() {
+    //Provider.of<CustomerProvider>(context, listen: false).clearCustomerData();
     super.initState();
     fetchAllCustomers();
   }
@@ -60,11 +61,9 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
         });
         return;
       }
-      Provider.of<CustomerProvider>(context, listen: false).clearCustomerData();
-
       MySqlConnection connection = await Mysql().connection;
       var results = await connection.query(
-          'select Production.customers.* from Production.customers natural join Production.users where Production.users.user_id = ? and is_deleted = false',
+          'select Production.customers.* from Production.customers join Production.users on customers.seller_id = users.user_id where Production.users.user_id = ? and is_deleted = false',
           [userId]);
 
       debugPrint('Query executed, number of results: ${results.length}');

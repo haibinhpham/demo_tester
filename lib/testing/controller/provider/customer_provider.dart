@@ -27,5 +27,6 @@ class CustomerProvider extends ChangeNotifier {
     customerInfo = null;
     customerOrders = [];
     notifyListeners();
+    debugPrint('CustomerProvider data cleared');
   }
 }
