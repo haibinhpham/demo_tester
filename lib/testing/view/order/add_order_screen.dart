@@ -89,7 +89,7 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
       MySqlConnection connection = await Mysql().connection;
       //perform operation
       var results = await connection.query(
-          'select Production.customers.customer_id, Production.customers.name from Production.customers where Production.customers.seller_id = ?',
+          'select Production.customers.customer_id, Production.customers.name from Production.customers where Production.customers.seller_id = ? and Production.customers.is_deleted = false',
           [userId]);
       //map to dropdown
       setState(() {
