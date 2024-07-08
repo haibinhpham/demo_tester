@@ -189,6 +189,13 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
   }
 
   Future<void> performAddOrder() async {
+    //check for null customer or items
+    if (selectedCustomer == null || selectedItems.isEmpty) {
+      //Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Select at least 1 item or customer')));
+      return;
+    }
     UtilWidget.showLoadingDialog(context: context);
     try {
       //get provider
