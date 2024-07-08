@@ -27,6 +27,8 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
   }
 
   Future<void> fetchCustomerData() async {
+    //reset the list of items
+    Provider.of<CustomerProvider>(context, listen: false).setCustomerOrders([]);
     await fetchCustomerDetails();
     await fetchCustomerOrders();
 
