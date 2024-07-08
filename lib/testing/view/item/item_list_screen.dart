@@ -86,7 +86,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
       Navigator.of(context).pop();
       return 'Delete Successful';
     } catch (e) {
-      debugPrint('Error deleteing item: $e');
+      debugPrint('Error deleting item: $e');
       Navigator.of(context).pop();
       return 'Delete Error';
     }

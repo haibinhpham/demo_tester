@@ -8,6 +8,7 @@ import '../../controller/provider/order_provider.dart';
 import '../../controller/provider/user_provider.dart';
 import '../../model/mysql.dart';
 import '../../model/order.dart';
+import '../widgets/loading_indicator.dart';
 
 class OrderListScreen extends StatefulWidget {
   const OrderListScreen({super.key});
@@ -19,7 +20,9 @@ class OrderListScreen extends StatefulWidget {
 class _OrderListScreenState extends State<OrderListScreen> {
   Order? order;
   List<Order> orders = [];
+  List<Order> filteredOrder = [];
   bool isLoading = true;
+  bool isSearching = false;
   final f = NumberFormat("###,###.###", "id_ID");
 
   @override
@@ -63,6 +66,77 @@ class _OrderListScreenState extends State<OrderListScreen> {
       });
     }
   }
+
+  // Future<String> deleteOrder(int orderId) async {
+  //   UtilWidget.showLoadingDialog(context: context);
+  //   try {
+  //     //get provider
+  //     int? userId = Provider.of<UserProvider>(context, listen: false).userId;
+  //     if (userId == null) {
+  //       return 'User ID is null';
+  //     }
+  //     //get connection
+  //     MySqlConnection connection = await Mysql().connection;
+  //     //delete operation
+  //
+  //     await connection.query(
+  //         'delete from Production.orders where Production.orders.order_id = ?',
+  //         [orderId]);
+  //     //reload after query
+  //     fetchAllOrders();
+  //     Navigator.of(context).pop();
+  //     return 'Delete Successful';
+  //   } catch (e) {
+  //     debugPrint('Error deleting order: $e');
+  //     Navigator.of(context).pop();
+  //     return 'Delete Error';
+  //   }
+  // }
+  //
+  // void _showConfirmationDialog(int orderId) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: const Text('Confirm Deletion'),
+  //         content: const Text('Are you sure?'),
+  //         actions: [
+  //           TextButton(
+  //               onPressed: () {
+  //                 Navigator.of(context).pop();
+  //               },
+  //               child: const Text('Cancel')),
+  //           TextButton(
+  //               onPressed: () async {
+  //                 Navigator.of(context).pop();
+  //                 String result = await deleteOrder(orderId);
+  //                 _showResultDialog(result);
+  //               },
+  //               child: const Text('Confirm')),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
+  //
+  // void _showResultDialog(String message) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: const Text('Result'),
+  //         content: Text(message),
+  //         actions: [
+  //           TextButton(
+  //               onPressed: () {
+  //                 Navigator.of(context).pop();
+  //               },
+  //               child: const Text('OK')),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -126,16 +200,21 @@ class _OrderListScreenState extends State<OrderListScreen> {
                         Text('Total: ${f.format(order.totalPrice)}',
                             style: const TextStyle(color: Colors.black54)),
                         Text('Order status: ${order.status}',
-                            style: const TextStyle(color: Colors.black54)),
+                            style: const TextStyle(color: Colors.black54, fontWeight: FontWeight.bold)),
                       ],
                     ),
-                    trailing: GestureDetector(
-                      child: IconButton(
-                          onPressed: () {
-                            debugPrint('Delete btn presssed');
-                          },
-                          icon: const Icon(Icons.delete_rounded)),
-                    ),
+                    // trailing: GestureDetector(
+                    //   child: IconButton(
+                    //       onPressed: () {
+                    //         debugPrint('Delete btn presssed');
+                    //       },
+                    //       icon: const Icon(
+                    //           Icons.delete_rounded,
+                    //           color: Colors.grey)),
+                    //   //onTap: () {
+                    //     //_showConfirmationDialog(order.orderId);
+                    //   //},
+                    // ),
                     onTap: () {
                       debugPrint('List tile pressed');
                       //save to provider

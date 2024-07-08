@@ -181,6 +181,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                             'packaged',
                             'delivering',
                             'delivered',
+                            'cancelled',
                           ].map((String value) {
                             return DropdownMenuItem<String>(
                                 value: value, child: Text(value));
