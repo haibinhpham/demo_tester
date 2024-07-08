@@ -203,18 +203,18 @@ class _OrderListScreenState extends State<OrderListScreen> {
                             style: const TextStyle(color: Colors.black54, fontWeight: FontWeight.bold)),
                       ],
                     ),
-                    // trailing: GestureDetector(
-                    //   child: IconButton(
-                    //       onPressed: () {
-                    //         debugPrint('Delete btn presssed');
-                    //       },
-                    //       icon: const Icon(
-                    //           Icons.delete_rounded,
-                    //           color: Colors.grey)),
+                    trailing: GestureDetector(
+                      child: IconButton(
+                          onPressed: () {
+                            debugPrint('Delete btn presssed');
+                          },
+                          icon: const Icon(
+                              Icons.delete_rounded,
+                              color: Colors.grey)),
                     //   //onTap: () {
                     //     //_showConfirmationDialog(order.orderId);
                     //   //},
-                    // ),
+                     ),
                     onTap: () {
                       debugPrint('List tile pressed');
                       //save to provider
